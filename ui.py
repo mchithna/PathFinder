@@ -1,8 +1,38 @@
-# This file handle all the user inputs
+import pygame
+from settings import *
 
-# buttons for all the controls
-    # mase size
-    # generation algo selection
-    # solving algo selection
+class Button:
+    def __init__(self, x, y, width, height, text):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.font = pygame.font.SysFont('Arial', 24)
 
-# slider for play speed change
+    def draw(self, screen):
+        # button hovering effect
+        mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mouse_pos):
+            color = BUTTON1_COLOUR
+        else:
+            color = BUTTON1H_COLOUR
+        
+        # draw the rectangle
+        pygame.draw.rect(screen, color, self.rect)
+        pygame.draw.rect(screen, WHITE, self.rect, 2) # border
+
+        # draw the text 
+        text_surf = self.font.render(self.text, True, TEXT_COLOUR)
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        screen.blit(text_surf, text_rect)
+
+    def is_clicked(self, event):
+        # check if the left mouse is clicked 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1: # left click
+                if self.rect.collidepoint(event.pos):
+                    return True
+        return False
+
+def draw_sidebar(screen):
+    # draw a background
+    rect = pygame.Rect(MAZE_WIDTH, 0, SIDEBAR_WIDTH, HEIGHT)
+    pygame.draw.rect(screen, SIDEBAR_COLOUR, rect)

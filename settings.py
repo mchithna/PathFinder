@@ -3,16 +3,25 @@ WIDTH = 1200
 HEIGHT = 600
 MAZE_WIDTH = 800  
 MAZE_HEIGHT = 600
+SIDEBAR_WIDTH = 400
+
 
 # Grid Configuration
 TILE_SIZE = 40
 COLS = MAZE_WIDTH // TILE_SIZE
 ROWS = MAZE_HEIGHT // TILE_SIZE
-# Colours - as (R, G, B)
+
+# Main Colours - as (R, G, B)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (50, 50, 50)
 GRID_COLOUR = (100, 100, 100)
+
+# UI Colors
+SIDEBAR_COLOUR = (30, 30, 30)
+BUTTON1_COLOUR = (70, 70, 70)
+BUTTON1H_COLOUR = (100, 100, 100)
+TEXT_COLOUR = (255, 255, 255)
 
 # Game settings
 FPS = 60
