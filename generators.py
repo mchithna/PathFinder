@@ -22,4 +22,25 @@ def remove_walls(current, next):
     if dy == 1:
         current.walls[0] = False
         next.walls[2] = False
+
+# -- Recursive Backtracker algorithm
+
+def recursive_backtracker(current_cell, grid_cells, stack):
+
+    # check neighbors 
+    next_cell = current_cell.check_neighbors(grid_cells)
     
+    if next_cell:
+        # if neighbor found
+        next_cell.visited = True
+        stack.append(current_cell) # save the position
+        remove_walls(current_cell, next_cell) # break wall
+        return next_cell # move there
+    
+    elif len(stack) > 0:
+        # if stuck , backtrack
+        return stack.pop()
+    
+    else:
+        # if finished (empty stack)
+        return None

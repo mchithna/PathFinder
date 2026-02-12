@@ -2,7 +2,9 @@ import pygame
 import sys
 from settings import *
 from grid import init_grid
-from generators import remove_walls
+from generators import recursive_backtracker 
+from ui import Button, draw_sidebar
+
 
 def main():
     # window setup 
@@ -13,11 +15,24 @@ def main():
 
     # create grid
     grid_cells = init_grid()
+
+    # define start and end 
+    start_cell = grid_cells[0]
+    end_cell = grid_cells[-1]
+
+    start_cell.is_start = True
+    end_cell.is_end = True
     
     # generator configurations
     current_cell = grid_cells[0]
     current_cell.visited = True
     stack = [] # backtracking path
+
+    # state indicator
+    is_generating = False 
+
+    # UI setup
+    btn_generate = Button(MAZE_WIDTH + 25, 50, 150, 50, "Generate")
 
     # game loop
     running = True
@@ -26,27 +41,21 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+            
+            # generate button event
+            if btn_generate.is_clicked(event):
+                is_generating = True
 
-        # -- Backtracking algo -- 
-        # check for neighbors
-        next_cell = current_cell.check_neighbors(grid_cells)
-
-        if next_cell:
-            next_cell.visited = True
-
-            # add current cell into stack
-            stack.append(current_cell)
-
-            # remove the walls 
-            remove_walls(current_cell, next_cell)
-
-            # proceed to next
-            current_cell = next_cell
-
-        elif len(stack) > 0:
-            # if stuck , backtrack
-            current_cell = stack.pop()
-
+        # maze logic
+        if is_generating:
+            # recursive calling 
+            new_cell = recursive_backtracker(current_cell, grid_cells, stack)
+            
+            if new_cell:
+                current_cell = new_cell
+            else:
+                is_generating = False # stop
+                print("Maze Generation Complete.")
 
         # visuals
         screen.fill(GREY)
@@ -55,12 +64,16 @@ def main():
             cell.draw(screen)
         
         # highlight the Head
-        x = current_cell.x * TILE_SIZE
-        y = current_cell.y * TILE_SIZE
-        pygame.draw.rect(screen, (20, 240, 20), (x, y, TILE_SIZE, TILE_SIZE))
+        if is_generating:
+            x = current_cell.x * TILE_SIZE
+            y = current_cell.y * TILE_SIZE
+            pygame.draw.rect(screen, (20, 240, 20), (x, y, TILE_SIZE, TILE_SIZE))
+
+        # draw the controls n sidebar
+        draw_sidebar(screen)
+        btn_generate.draw(screen)
 
         pygame.display.flip() 
-
         clock.tick(FPS) # Limit to 60 FPS
 
     pygame.quit()
