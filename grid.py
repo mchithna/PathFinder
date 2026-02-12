@@ -12,12 +12,21 @@ class Cell:
         self.walls = [True, True, True, True]
         self.visited = False
 
+        # identify the start and end 
+        self.is_start = False
+        self.is_end = False
+
     def draw(self, screen):
         x =  self.x * TILE_SIZE
         y = self.y * TILE_SIZE
 
-        if self.visited:
-            pygame.draw.rect(screen, (50, 0, 50), (x, y, TILE_SIZE, TILE_SIZE))
+        # tile colouring
+        if self.is_start:
+            pygame.draw.rect(screen, START_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
+        elif self.is_end:
+            pygame.draw.rect(screen, END_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
+        elif self.visited:
+            pygame.draw.rect(screen, VISITED_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
 
         # check if the wall is true, then draw line 
 
