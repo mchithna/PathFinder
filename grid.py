@@ -15,6 +15,9 @@ class Cell:
         # identify the start and end 
         self.is_start = False
         self.is_end = False
+        # identify the path
+        self.is_scanned = False
+        self.is_path = False
 
     def draw(self, screen):
         x =  self.x * TILE_SIZE
@@ -25,6 +28,10 @@ class Cell:
             pygame.draw.rect(screen, START_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
         elif self.is_end:
             pygame.draw.rect(screen, END_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
+        elif self.is_path:
+            pygame.draw.rect(screen, PATH_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
+        elif self.is_scanned:
+            pygame.draw.rect(screen, SCAN_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
         elif self.visited:
             pygame.draw.rect(screen, VISITED_COLOUR, (x, y, TILE_SIZE, TILE_SIZE))
 
