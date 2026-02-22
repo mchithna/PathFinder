@@ -3,7 +3,7 @@
 from settings import *
 
 # -- Breadth-First Search algorithm
-def step_bfs(queue, visited, parent_map, grid_cells):
+def step_bfs(queue, visited, parent_map, grid_cells, cols, rows):
     if not queue:
         return None # path is finished
     
@@ -13,9 +13,9 @@ def step_bfs(queue, visited, parent_map, grid_cells):
 
     # helper function to find the neighor cell index
     def get_index(x, y):
-        if x < 0 or x >= COLS or y < 0 or y >= ROWS: 
+        if x < 0 or x >= cols or y < 0 or y >= rows: 
             return -1 # no neighbors
-        return x + (y * COLS)
+        return x + (y * cols)
     
     # check all directions for walls
 
