@@ -53,6 +53,17 @@ def main():
     btn_l = Button(980, 200, 50, 40, "L")
     btn_xl = Button(1045, 200, 50, 40, "XL")
 
+    # speed configurations 
+    speeds = {"x0.1": 0.1, "x0.5": 0.5, "x1": 1, "x5": 5, "x10": 10}
+    current_speed = "x1"
+    step_accumulator = 0.0
+
+    btn_spd_01 = Button(850, 290, 45, 40, ".1x")
+    btn_spd_05 = Button(901, 290, 45, 40, ".5x")
+    btn_spd_1  = Button(952, 290, 45, 40, "1x")
+    btn_spd_5  = Button(1003, 290, 45, 40, "5x")
+    btn_spd_10 = Button(1054, 290, 45, 40, "10x")
+
     ui_font = pygame.font.SysFont('Arial', 20)
 
     # game loop
@@ -62,6 +73,12 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+
+            if btn_spd_01.is_clicked(event): current_speed = "x0.1"
+            if btn_spd_05.is_clicked(event): current_speed = "x0.5"
+            if btn_spd_1.is_clicked(event): current_speed = "x1"
+            if btn_spd_5.is_clicked(event): current_speed = "x5"
+            if btn_spd_10.is_clicked(event): current_speed = "x10"
             
             #  size Buttons logic 
             new_size = None
@@ -83,6 +100,9 @@ def main():
                 current_cell = start_cell
                 current_cell.visited = True
                 stack = []
+                bfs_queue = deque()
+                bfs_visited = set()
+                parent_map = {}
                 is_generating = False
                 is_solving = False
 
@@ -99,6 +119,9 @@ def main():
                 current_cell = start_cell
                 current_cell.visited = True
                 stack = []
+                bfs_queue = deque()
+                bfs_visited = set()
+                parent_map = {}
                 is_generating = True
                 is_solving = False
             
@@ -113,12 +136,20 @@ def main():
                     bfs_visited = {start_cell}
                     parent_map = {start_cell: None}
                     is_solving = True
+        
+        # Game logic
+
+        steps_this_frame = 0
+        if is_generating or is_solving:
+            step_accumulator += speeds[current_speed]
+            steps_this_frame = int(step_accumulator)
+            step_accumulator -= steps_this_frame
 
 
         # 1. maze generator logic
         if is_generating:
             # recursive calling 
-            for _ in range(5): ## NOT PERMENANT ONLY FOR TESTING
+            for _ in range(steps_this_frame): ## NOT PERMENANT ONLY FOR TESTING
                 new_cell = recursive_backtracker(current_cell, grid_cells, stack)
                 if new_cell:
                     current_cell = new_cell
@@ -129,19 +160,22 @@ def main():
         
         # 2. maze solver logic
         if is_solving:
-            current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells)
+            for _ in range(steps_this_frame):
+                current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
 
-            if current_processed is None:  # queue is empty 
-                is_solving = False
-                print("No Path Possible.")
-            elif current_processed == end_cell:  # end cell found
-                is_solving = False
-                print("Path Found!")
+                if current_processed is None:  # queue is empty 
+                    is_solving = False
+                    print("No Path Possible.")
+                    break
+                elif current_processed == end_cell:  # end cell found
+                    is_solving = False
+                    print("Path Found!")
 
-                temp = end_cell
-                while temp is not None:
-                    temp.is_path = True
-                    temp = parent_map.get(temp)
+                    temp = end_cell
+                    while temp is not None:
+                        temp.is_path = True
+                        temp = parent_map.get(temp)
+                    break
 
         # visuals
         screen.fill(GREY)
@@ -168,6 +202,16 @@ def main():
         btn_m.draw(screen, is_active=(current_size == "M"))
         btn_l.draw(screen, is_active=(current_size == "L"))
         btn_xl.draw(screen, is_active=(current_size == "XL"))
+
+        # draw speed ui elements
+        speed_label = ui_font.render("Animation Speed", True, TEXT_COLOUR)
+        screen.blit(speed_label, (850, 260))
+
+        btn_spd_01.draw(screen, is_active=(current_speed == "x0.1"))
+        btn_spd_05.draw(screen, is_active=(current_speed == "x0.5"))
+        btn_spd_1.draw(screen, is_active=(current_speed == "x1"))
+        btn_spd_5.draw(screen, is_active=(current_speed == "x5"))
+        btn_spd_10.draw(screen, is_active=(current_speed == "x10"))
 
         pygame.display.flip() 
         clock.tick(FPS) # Limit to 60 FPS
