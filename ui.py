@@ -7,13 +7,16 @@ class Button:
         self.text = text
         self.font = pygame.font.SysFont('Arial', 24)
 
-    def draw(self, screen):
+    def draw(self, screen, is_active=False):
         # button hovering effect
         mouse_pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(mouse_pos):
-            color = BUTTON1_COLOUR
-        else:
+
+        if is_active:
+            color = ACTIVE_BUTTON_COLOUR
+        elif self.rect.collidepoint(mouse_pos):
             color = BUTTON1H_COLOUR
+        else:
+            color = BUTTON1_COLOUR
         
         # draw the rectangle
         pygame.draw.rect(screen, color, self.rect)
