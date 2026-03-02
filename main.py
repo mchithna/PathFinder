@@ -64,6 +64,16 @@ def main():
     btn_spd_5  = Button(1003, 290, 45, 40, "5x")
     btn_spd_10 = Button(1054, 290, 45, 40, "10x")
 
+    # Algorithm configurations
+    current_generator = "DFS"
+    btn_gen_dfs = Button(850, 380, 80, 40, "DFS")
+    btn_gen_prim = Button(940, 380, 80, 40, "Prim")
+
+    current_solver = "BFS"
+    btn_sol_bfs = Button(850, 470, 70, 40, "BFS")
+    btn_sol_dfs = Button(930, 470, 70, 40, "DFS")
+    btn_sol_astar = Button(1010, 470, 70, 40, "A*")
+
     ui_font = pygame.font.SysFont('Arial', 20)
 
     # game loop
@@ -79,6 +89,14 @@ def main():
             if btn_spd_1.is_clicked(event): current_speed = "x1"
             if btn_spd_5.is_clicked(event): current_speed = "x5"
             if btn_spd_10.is_clicked(event): current_speed = "x10"
+
+            # algorithm selectors logic 
+            if btn_gen_dfs.is_clicked(event): current_generator = "DFS"
+            if btn_gen_prim.is_clicked(event): current_generator = "Prim"
+            
+            if btn_sol_bfs.is_clicked(event): current_solver = "BFS"
+            if btn_sol_dfs.is_clicked(event): current_solver = "DFS"
+            if btn_sol_astar.is_clicked(event): current_solver = "A*"
             
             #  size Buttons logic 
             new_size = None
@@ -150,7 +168,12 @@ def main():
         if is_generating:
             # recursive calling 
             for _ in range(steps_this_frame): ## NOT PERMENANT ONLY FOR TESTING
-                new_cell = recursive_backtracker(current_cell, grid_cells, stack)
+                if current_generator == "DFS":
+                    new_cell = recursive_backtracker(current_cell, grid_cells, stack)
+                elif current_generator == "Prim":
+                    # placeholder for Prim algo 
+                    new_cell = recursive_backtracker(current_cell, grid_cells, stack)
+
                 if new_cell:
                     current_cell = new_cell
                 else:
@@ -161,7 +184,11 @@ def main():
         # 2. maze solver logic
         if is_solving:
             for _ in range(steps_this_frame):
-                current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
+                if current_solver == "BFS":
+                    current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
+                elif current_solver in ["DFS", "A*"]:
+                    # placeholder for DFS and A* algo
+                    current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
 
                 if current_processed is None:  # queue is empty 
                     is_solving = False
@@ -212,6 +239,18 @@ def main():
         btn_spd_1.draw(screen, is_active=(current_speed == "x1"))
         btn_spd_5.draw(screen, is_active=(current_speed == "x5"))
         btn_spd_10.draw(screen, is_active=(current_speed == "x10"))
+
+        # draw algo ui elements
+        gen_label = ui_font.render("Generator Algorithm", True, TEXT_COLOUR)
+        screen.blit(gen_label, (850, 350))
+        btn_gen_dfs.draw(screen, is_active=(current_generator == "DFS"))
+        btn_gen_prim.draw(screen, is_active=(current_generator == "Prim"))
+
+        sol_label = ui_font.render("Solver Algorithm", True, TEXT_COLOUR)
+        screen.blit(sol_label, (850, 440))
+        btn_sol_bfs.draw(screen, is_active=(current_solver == "BFS"))
+        btn_sol_dfs.draw(screen, is_active=(current_solver == "DFS"))
+        btn_sol_astar.draw(screen, is_active=(current_solver == "A*"))
 
         pygame.display.flip() 
         clock.tick(FPS) # Limit to 60 FPS
