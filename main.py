@@ -2,10 +2,9 @@ import pygame
 import sys
 from settings import *
 from grid import init_grid
-from generators import recursive_backtracker 
-from solvers import step_bfs
+from generators import *
+from solvers import *
 from ui import Button, draw_sidebar
-from collections import deque
 
 
 def main():
@@ -43,6 +42,10 @@ def main():
     # state indicator
     is_generating = False
     is_solving = False
+
+    # The Strategy Objects
+    active_generator = DFSGenerator(start_cell, cols, rows)
+    active_solver = None
 
     # UI setup
     btn_generate = Button(MAZE_WIDTH + 25, 50, 150, 50, "Generate")
@@ -105,6 +108,7 @@ def main():
             if btn_l.is_clicked(event): new_size = "L"
             if btn_xl.is_clicked(event): new_size = "XL"
 
+            # if a size button was clicked, reset
             if new_size and new_size != current_size:
                 current_size = new_size
                 tile_size = sizes[current_size]
@@ -115,12 +119,8 @@ def main():
                 start_cell.is_start = True
                 end_cell.is_end = True
                 
-                current_cell = start_cell
-                current_cell.visited = True
-                stack = []
-                bfs_queue = deque()
-                bfs_visited = set()
-                parent_map = {}
+                active_generator = DFSGenerator(start_cell, cols, rows)
+
                 is_generating = False
                 is_solving = False
 
@@ -133,13 +133,12 @@ def main():
                 start_cell.is_start = True
                 end_cell.is_end = True
 
-                # reset the configurations
-                current_cell = start_cell
-                current_cell.visited = True
-                stack = []
-                bfs_queue = deque()
-                bfs_visited = set()
-                parent_map = {}
+                # call chosen generator algorithm
+                if current_generator == "DFS":
+                    active_generator = DFSGenerator(start_cell, cols, rows)
+                elif current_generator == "Prim":
+                    # will remove after prim is built 
+                    active_generator = DFSGenerator(start_cell, cols, rows)
                 is_generating = True
                 is_solving = False
             
@@ -150,9 +149,13 @@ def main():
                         cell.is_scanned = False
                         cell.is_path = False
                         
-                    bfs_queue = deque([start_cell])
-                    bfs_visited = {start_cell}
-                    parent_map = {start_cell: None}
+                    # call chosen solver algorithm 
+                    if current_solver == "BFS":
+                        active_solver = BFSSolver(start_cell, end_cell, cols, rows)
+                    elif current_solver in ["DFS", "A*"]:
+                        # will remove after DFS and A* are built
+                        active_solver = BFSSolver(start_cell, end_cell, cols, rows)
+
                     is_solving = True
         
         # Game logic
@@ -167,16 +170,10 @@ def main():
         # 1. maze generator logic
         if is_generating:
             # recursive calling 
-            for _ in range(steps_this_frame): ## NOT PERMENANT ONLY FOR TESTING
-                if current_generator == "DFS":
-                    new_cell = recursive_backtracker(current_cell, grid_cells, stack)
-                elif current_generator == "Prim":
-                    # placeholder for Prim algo 
-                    new_cell = recursive_backtracker(current_cell, grid_cells, stack)
-
-                if new_cell:
-                    current_cell = new_cell
-                else:
+            for _ in range(steps_this_frame):
+                result_cell = active_generator.step(grid_cells)
+                
+                if result_cell is None:
                     is_generating = False 
                     print("Maze Generation Complete.")
                     break
@@ -184,25 +181,22 @@ def main():
         # 2. maze solver logic
         if is_solving:
             for _ in range(steps_this_frame):
-                if current_solver == "BFS":
-                    current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
-                elif current_solver in ["DFS", "A*"]:
-                    # placeholder for DFS and A* algo
-                    current_processed = step_bfs(bfs_queue, bfs_visited, parent_map, grid_cells, cols, rows)
+                current_processed = active_solver.step(grid_cells)
 
-                if current_processed is None:  # queue is empty 
+                if current_processed is None:  
                     is_solving = False
                     print("No Path Possible.")
                     break
-                elif current_processed == end_cell:  # end cell found
+                elif current_processed == end_cell:  
                     is_solving = False
                     print("Path Found!")
-
                     temp = end_cell
+                    # backtracking path with object's parent map
                     while temp is not None:
                         temp.is_path = True
-                        temp = parent_map.get(temp)
+                        temp = active_solver.parent_map.get(temp)
                     break
+
 
         # visuals
         screen.fill(GREY)
@@ -211,9 +205,9 @@ def main():
             cell.draw(screen)
         
         # highlight the Head
-        if is_generating:
-            x = current_cell.x * tile_size
-            y = current_cell.y * tile_size
+        if is_generating and active_generator.current_cell:
+            x = active_generator.current_cell.x * tile_size
+            y = active_generator.current_cell.y * tile_size
             pygame.draw.rect(screen, (20, 240, 20), (x, y, tile_size, tile_size))
 
         # draw the controls n sidebar
