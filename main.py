@@ -138,7 +138,7 @@ def main():
                     active_generator = DFSGenerator(start_cell, cols, rows)
                 elif current_generator == "Prim":
                     # will remove after prim is built 
-                    active_generator = DFSGenerator(start_cell, cols, rows)
+                    active_generator = PrimGenerator(start_cell, cols, rows)
                 is_generating = True
                 is_solving = False
             
