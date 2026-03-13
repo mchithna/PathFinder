@@ -94,12 +94,24 @@ def main():
             if btn_spd_10.is_clicked(event): current_speed = "x10"
 
             # algorithm selectors logic 
-            if btn_gen_dfs.is_clicked(event): current_generator = "DFS"
-            if btn_gen_prim.is_clicked(event): current_generator = "Prim"
+             # --- Algorithm Selectors Logic ---
+            if btn_gen_dfs.is_clicked(event) and current_generator != "DFS": 
+                current_generator = "DFS"
+                print(f"[UI] Switched Generator to: {current_generator}")
+            if btn_gen_prim.is_clicked(event) and current_generator != "Prim": 
+                current_generator = "Prim"
+                print(f"[UI] Switched Generator to: {current_generator}")
             
-            if btn_sol_bfs.is_clicked(event): current_solver = "BFS"
-            if btn_sol_dfs.is_clicked(event): current_solver = "DFS"
-            if btn_sol_astar.is_clicked(event): current_solver = "A*"
+            if btn_sol_bfs.is_clicked(event) and current_solver != "BFS": 
+                current_solver = "BFS"
+                print(f"[UI] Switched Solver to: {current_solver}")
+            if btn_sol_dfs.is_clicked(event) and current_solver != "DFS": 
+                current_solver = "DFS"
+                print(f"[UI] Switched Solver to: {current_solver}")
+            if btn_sol_astar.is_clicked(event) and current_solver != "A*": 
+                current_solver = "A*"
+                print(f"[UI] Switched Solver to: {current_solver}")
+
             
             #  size Buttons logic 
             new_size = None
@@ -133,6 +145,9 @@ def main():
                 start_cell.is_start = True
                 end_cell.is_end = True
 
+                print(f"\n>>> Starting Maze Generation using {current_generator} <<<")
+
+
                 # call chosen generator algorithm
                 if current_generator == "DFS":
                     active_generator = DFSGenerator(start_cell, cols, rows)
@@ -149,11 +164,15 @@ def main():
                         cell.is_scanned = False
                         cell.is_path = False
                         
+                        print(f"\n>>> Starting Maze Solving using {current_solver} <<<")
+                        
                     # call chosen solver algorithm 
                     if current_solver == "BFS":
                         active_solver = BFSSolver(start_cell, end_cell, cols, rows)
-                    elif current_solver in ["DFS", "A*"]:
-                        # will remove after DFS and A* are built
+                    elif current_solver == "DFS":
+                        active_solver = DFSSolver(start_cell, end_cell, cols, rows)
+                    elif current_solver == "A*":
+                        # placeholder until A* is built
                         active_solver = BFSSolver(start_cell, end_cell, cols, rows)
 
                     is_solving = True
