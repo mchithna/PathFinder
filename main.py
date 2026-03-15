@@ -77,7 +77,7 @@ def main():
     btn_sol_dfs = Button(930, 470, 70, 40, "DFS")
     btn_sol_astar = Button(1010, 470, 70, 40, "A*")
 
-    ui_font = pygame.font.SysFont('Arial', 20)
+    ui_font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 17, bold=True)
 
     # game loop
     running = True
