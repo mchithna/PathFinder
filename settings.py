@@ -12,8 +12,8 @@ GREY = (30, 30, 46)
 GRID_COLOUR = (49, 50, 68)        
 
 # Cell Colours
-START_COLOUR = (250, 179, 135)
-END_COLOUR = (148, 226, 213)  
+START_COLOUR = (166, 218, 149)
+END_COLOUR = (237, 135, 150)
 VISITED_COLOUR = (69, 71, 90)
 
 # Solver Colors

@@ -15,7 +15,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Size Configurations
-    sizes = {"S": 80, "M": 40, "L": 20, "XL": 10} # Values are tile size
+    sizes = {"S": 50, "M": 25, "L": 20, "XL": 10} # Values are tile size
     current_size = "M"
     tile_size = sizes[current_size]
     
