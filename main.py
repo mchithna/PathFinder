@@ -43,7 +43,14 @@ def main():
     is_generating = False
     is_solving = False
 
-    # strategy objects
+    # analytics variables
+    scanned_count = 0
+    path_count = 0
+    efficiency = 0
+    start_time = 0
+    final_status_text = "Idle"
+
+    # The strategy objects
     active_generator = DFSGenerator(start_cell, cols, rows)
     active_solver = None
 
@@ -134,6 +141,12 @@ def main():
                 is_generating = False
                 is_solving = False
 
+                # reset analytics
+                scanned_count = 0
+                path_count = 0
+                efficiency = 0
+                final_status_text = "Idle"
+
             # generate button event
             if btn_generate.is_clicked(event):
                 # reset grid for a new maze
@@ -153,6 +166,13 @@ def main():
                     active_generator = PrimGenerator(start_cell, cols, rows)
                 is_generating = True
                 is_solving = False
+
+                # start analytics timer
+                scanned_count = 0
+                path_count = 0
+                efficiency = 0
+                final_status_text = ""
+                start_time = pygame.time.get_ticks()
             
             if btn_solve.is_clicked(event):
                 if not is_generating: # solve when maze is ready
@@ -173,6 +193,13 @@ def main():
                         active_solver = AStarSolver(start_cell, end_cell, cols, rows)
 
                     is_solving = True
+
+                    # start analytics timer
+                    scanned_count = 0
+                    path_count = 0
+                    efficiency = 0
+                    final_status_text = ""
+                    start_time = pygame.time.get_ticks()
         
         # Game logic
 
@@ -192,25 +219,45 @@ def main():
                 if result_cell is None:
                     is_generating = False 
                     print("Maze Generation Complete.")
+                    
+                    # record end-time
+                    elapsed = pygame.time.get_ticks() - start_time
+                    final_status_text = f"Generated - {elapsed}ms"
                     break
         
         # 2. maze solver logic
         if is_solving:
+            # live update scanned count!
+            if active_solver:
+                scanned_count = len(active_solver.visited)
+
             for _ in range(steps_this_frame):
                 current_processed = active_solver.step(grid_cells)
 
                 if current_processed is None:  
                     is_solving = False
                     print("No Path Possible.")
+                    
+                    elapsed = pygame.time.get_ticks() - start_time
+                    final_status_text = f"No Path - {elapsed}ms"
                     break
                 elif current_processed == end_cell:  
                     is_solving = False
                     print("Path Found!")
+                    
+                    elapsed = pygame.time.get_ticks() - start_time
+                    final_status_text = f"Solved - {elapsed}ms"
+
                     temp = end_cell
                     # backtracking path with object's parent map
                     while temp is not None:
                         temp.is_path = True
+                        path_count += 1 # count path length
                         temp = active_solver.parent_map.get(temp)
+                    
+                    # calculate final efficiency
+                    if scanned_count > 0:
+                        efficiency = int((path_count / scanned_count) * 100)
                     break
 
 
@@ -232,18 +279,21 @@ def main():
         btn_solve.draw(screen)
 
         # find current status for the status badge
-        current_status_text = "Idle"
+        current_status_text = final_status_text
         current_status_color = STATUS_IDLE
+        
         if is_generating:
             current_status_text = "Generating..."
             current_status_color = STATUS_GEN
         elif is_solving:
             current_status_text = "Solving..."
             current_status_color = STATUS_SOLVING
-        
-        # Draw bottom status bar (Placeholder 0s for now)
-        draw_status_bar(screen, status_text=current_status_text, status_color=current_status_color, scanned=0, path=0, efficiency=0)
-        
+        elif "Solved" in current_status_text:
+            current_status_color = STATUS_SOLVED
+
+        # draw bottom status bar with LIVE data
+        draw_status_bar(screen, status_text=current_status_text, status_color=current_status_color, scanned=scanned_count, path=path_count, efficiency=efficiency)
+
         # draw size ui elements
         size_label = ui_font.render("Maze Size", True, TEXT_COLOUR)
         screen.blit(size_label, (850, 175))
@@ -276,7 +326,7 @@ def main():
         btn_sol_astar.draw(screen, is_active=(current_solver == "A*"))
 
         pygame.display.flip() 
-        clock.tick(FPS) # Limit to 60 FPS
+        clock.tick(FPS) # limit to 60 FPS
 
     pygame.quit()
 
