@@ -53,3 +53,33 @@ def draw_sidebar(screen):
     pygame.draw.rect(screen, SIDEBAR_COLOUR, rect)
 
     pygame.draw.line(screen, BUTTON1_COLOUR, (MAZE_WIDTH, 0), (MAZE_WIDTH, HEIGHT), 2)
+
+def draw_status_bar(screen, status_text="Idle", status_color=STATUS_IDLE, scanned=0, path=0, efficiency=0):
+    # draw background
+    bar_rect = pygame.Rect(0, MAZE_HEIGHT, MAZE_WIDTH, HEIGHT - MAZE_HEIGHT)
+    pygame.draw.rect(screen, BOTTOM_BAR_COLOUR, bar_rect)
+    
+    # draw top border
+    pygame.draw.line(screen, BUTTON1_COLOUR, (0, MAZE_HEIGHT), (MAZE_WIDTH, MAZE_HEIGHT), 2)
+
+    font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 16, bold=True)
+    
+    # draw status badge 
+    text_color = TEXT_COLOUR if status_color == STATUS_IDLE else ACTIVE_TEXT_COLOUR
+    status_surf = font.render(status_text, True, text_color)
+    
+    badge_width = status_surf.get_width() + 30
+    badge_rect = pygame.Rect(20, MAZE_HEIGHT + 10, badge_width, 30)
+    pygame.draw.rect(screen, status_color, badge_rect, border_radius=6)
+    
+    screen.blit(status_surf, (badge_rect.centerx - status_surf.get_width()//2, badge_rect.centery - status_surf.get_height()//2))
+
+    # draw analytics
+    scan_surf = font.render(f"Scanned Cells:  {scanned}", True, TEXT_COLOUR)
+    screen.blit(scan_surf, (220, MAZE_HEIGHT + 14))
+
+    path_surf = font.render(f"Path Length:  {path}", True, TEXT_COLOUR)
+    screen.blit(path_surf, (430, MAZE_HEIGHT + 14))
+
+    eff_surf = font.render(f"Efficiency:  {efficiency}%", True, TEXT_COLOUR)
+    screen.blit(eff_surf, (620, MAZE_HEIGHT + 14))

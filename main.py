@@ -4,7 +4,7 @@ from settings import *
 from grid import init_grid
 from generators import *
 from solvers import *
-from ui import Button, draw_sidebar
+from ui import Button, draw_sidebar, draw_status_bar
 
 
 def main():
@@ -43,7 +43,7 @@ def main():
     is_generating = False
     is_solving = False
 
-    # The Strategy Objects
+    # strategy objects
     active_generator = DFSGenerator(start_cell, cols, rows)
     active_solver = None
 
@@ -231,6 +231,19 @@ def main():
         btn_generate.draw(screen)
         btn_solve.draw(screen)
 
+        # find current status for the status badge
+        current_status_text = "Idle"
+        current_status_color = STATUS_IDLE
+        if is_generating:
+            current_status_text = "Generating..."
+            current_status_color = STATUS_GEN
+        elif is_solving:
+            current_status_text = "Solving..."
+            current_status_color = STATUS_SOLVING
+        
+        # Draw bottom status bar (Placeholder 0s for now)
+        draw_status_bar(screen, status_text=current_status_text, status_color=current_status_color, scanned=0, path=0, efficiency=0)
+        
         # draw size ui elements
         size_label = ui_font.render("Maze Size", True, TEXT_COLOUR)
         screen.blit(size_label, (850, 175))
