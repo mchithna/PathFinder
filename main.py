@@ -54,37 +54,41 @@ def main():
     active_generator = DFSGenerator(start_cell, cols, rows)
     active_solver = None
 
-    # UI setup
-    btn_generate = Button(MAZE_WIDTH + 25, 50, 150, 50, "Generate")
-    btn_solve = Button(MAZE_WIDTH + 25, 120, 150, 50, "Solve")
+    # UI and font setup
+    ui_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 18)
+    title_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 36, bold=True)
+    
+    # action buttons
+    btn_generate = Button(830, 480, 160, 50, "Generate")
+    btn_solve = Button(1010, 480, 160, 50, "Solve")
 
-    btn_s = Button(850, 200, 50, 40, "S")
-    btn_m = Button(915, 200, 50, 40, "M")
-    btn_l = Button(980, 200, 50, 40, "L")
-    btn_xl = Button(1045, 200, 50, 40, "XL")
+    # maze size buttons
+    btn_s = Button(830, 120, 50, 40, "S")
+    btn_m = Button(890, 120, 50, 40, "M")
+    btn_l = Button(950, 120, 50, 40, "L")
+    btn_xl = Button(1010, 120, 50, 40, "XL")
 
     # speed configurations 
     speeds = {"x0.1": 0.1, "x0.5": 0.5, "x1": 1, "x5": 5, "x10": 10}
     current_speed = "x1"
     step_accumulator = 0.0
 
-    btn_spd_01 = Button(850, 290, 45, 40, ".1x")
-    btn_spd_05 = Button(901, 290, 45, 40, ".5x")
-    btn_spd_1  = Button(952, 290, 45, 40, "1x")
-    btn_spd_5  = Button(1003, 290, 45, 40, "5x")
-    btn_spd_10 = Button(1054, 290, 45, 40, "10x")
+    # speed buttons
+    btn_spd_01 = Button(830, 390, 45, 40, ".1x")
+    btn_spd_05 = Button(885, 390, 45, 40, ".5x")
+    btn_spd_1  = Button(940, 390, 45, 40, "1x")
+    btn_spd_5  = Button(995, 390, 45, 40, "5x")
+    btn_spd_10 = Button(1050, 390, 50, 40, "10x")
 
     # Algorithm configurations
     current_generator = "DFS"
-    btn_gen_dfs = Button(850, 380, 80, 40, "DFS")
-    btn_gen_prim = Button(940, 380, 80, 40, "Prim")
+    btn_gen_dfs = Button(830, 210, 80, 40, "DFS")
+    btn_gen_prim = Button(920, 210, 80, 40, "Prim")
 
     current_solver = "BFS"
-    btn_sol_bfs = Button(850, 470, 70, 40, "BFS")
-    btn_sol_dfs = Button(930, 470, 70, 40, "DFS")
-    btn_sol_astar = Button(1010, 470, 70, 40, "A*")
-
-    ui_font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 17, bold=True)
+    btn_sol_bfs = Button(830, 300, 70, 40, "BFS")
+    btn_sol_dfs = Button(910, 300, 70, 40, "DFS")
+    btn_sol_astar = Button(990, 300, 70, 40, "A*")
 
     # game loop
     running = True
@@ -275,8 +279,11 @@ def main():
 
         # draw the controls n sidebar
         draw_sidebar(screen)
-        btn_generate.draw(screen)
-        btn_solve.draw(screen)
+        
+        # draw title
+        title_surf = title_font.render("PATHFINDER", True, TEXT_COLOUR)
+        title_rect = title_surf.get_rect(center=(1000, 50)) 
+        screen.blit(title_surf, title_rect)
 
         # find current status for the status badge
         current_status_text = final_status_text
@@ -296,7 +303,7 @@ def main():
 
         # draw size ui elements
         size_label = ui_font.render("Maze Size", True, TEXT_COLOUR)
-        screen.blit(size_label, (850, 175))
+        screen.blit(size_label, (830, 90))
         
         btn_s.draw(screen, is_active=(current_size == "S"))
         btn_m.draw(screen, is_active=(current_size == "M"))
@@ -305,7 +312,7 @@ def main():
 
         # draw speed ui elements
         speed_label = ui_font.render("Animation Speed", True, TEXT_COLOUR)
-        screen.blit(speed_label, (850, 260))
+        screen.blit(speed_label, (830, 360))
 
         btn_spd_01.draw(screen, is_active=(current_speed == "x0.1"))
         btn_spd_05.draw(screen, is_active=(current_speed == "x0.5"))
@@ -315,15 +322,18 @@ def main():
 
         # draw algo ui elements
         gen_label = ui_font.render("Generator Algorithm", True, TEXT_COLOUR)
-        screen.blit(gen_label, (850, 350))
+        screen.blit(gen_label, (830, 180))
         btn_gen_dfs.draw(screen, is_active=(current_generator == "DFS"))
         btn_gen_prim.draw(screen, is_active=(current_generator == "Prim"))
 
         sol_label = ui_font.render("Solver Algorithm", True, TEXT_COLOUR)
-        screen.blit(sol_label, (850, 440))
+        screen.blit(sol_label, (830, 270))
         btn_sol_bfs.draw(screen, is_active=(current_solver == "BFS"))
         btn_sol_dfs.draw(screen, is_active=(current_solver == "DFS"))
         btn_sol_astar.draw(screen, is_active=(current_solver == "A*"))
+
+        btn_generate.draw(screen)
+        btn_solve.draw(screen)
 
         pygame.display.flip() 
         clock.tick(FPS) # limit to 60 FPS
