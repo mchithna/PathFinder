@@ -47,6 +47,50 @@ class Button:
                     return True
         return False
 
+class SteppedSlider:
+    def __init__(self, x, y, width, height, options, start_index):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.options = options 
+        self.index = start_index
+        self.font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 16, bold=True)
+        self.dragging = False
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, BUTTON1_COLOUR, self.rect, border_radius=self.rect.height//2)
+        
+        step_width = self.rect.width / (len(self.options) - 1)
+        thumb_x = self.rect.x + (self.index * step_width)
+        thumb_rect = pygame.Rect(thumb_x - 10, self.rect.y - 8, 20, self.rect.height + 16)
+        
+        pygame.draw.rect(screen, BUTTON_SHADOW, (thumb_rect.x + 2, thumb_rect.y + 2, thumb_rect.width, thumb_rect.height), border_radius=5)
+        pygame.draw.rect(screen, ACTIVE_BUTTON_COLOUR, thumb_rect, border_radius=5)
+        
+        text_surf = self.font.render(self.options[self.index][0], True, TEXT_COLOUR)
+        screen.blit(text_surf, (self.rect.x + self.rect.width + 20, self.rect.y - 6))
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            step_width = self.rect.width / (len(self.options) - 1)
+            thumb_x = self.rect.x + (self.index * step_width)
+            thumb_rect = pygame.Rect(thumb_x - 10, self.rect.y - 8, 20, self.rect.height + 16)
+            
+            if self.rect.collidepoint(event.pos) or thumb_rect.collidepoint(event.pos):
+                self.dragging = True
+                self.update_index(event.pos[0])
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.dragging = False
+        elif event.type == pygame.MOUSEMOTION and self.dragging:
+            self.update_index(event.pos[0])
+
+    def update_index(self, mouse_x):
+        rel_x = mouse_x - self.rect.x
+        rel_x = max(0, min(rel_x, self.rect.width))
+        step_width = self.rect.width / (len(self.options) - 1)
+        self.index = round(rel_x / step_width)
+        
+    def get_value(self):
+        return self.options[self.index][1]
+    
 def draw_sidebar(screen):
     # draw a background
     rect = pygame.Rect(MAZE_WIDTH, 0, SIDEBAR_WIDTH, HEIGHT)

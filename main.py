@@ -4,7 +4,7 @@ from settings import *
 from grid import init_grid
 from generators import *
 from solvers import *
-from ui import Button, draw_sidebar, draw_status_bar
+from ui import Button, draw_sidebar, draw_status_bar, SteppedSlider
 
 
 def main():
@@ -68,18 +68,6 @@ def main():
     btn_l = Button(950, 120, 50, 40, "L")
     btn_xl = Button(1010, 120, 50, 40, "XL")
 
-    # speed configurations 
-    speeds = {"x0.1": 0.1, "x0.5": 0.5, "x1": 1, "x5": 5, "x10": 10}
-    current_speed = "x1"
-    step_accumulator = 0.0
-
-    # speed buttons
-    btn_spd_01 = Button(830, 390, 45, 40, ".1x")
-    btn_spd_05 = Button(885, 390, 45, 40, ".5x")
-    btn_spd_1  = Button(940, 390, 45, 40, "1x")
-    btn_spd_5  = Button(995, 390, 45, 40, "5x")
-    btn_spd_10 = Button(1050, 390, 50, 40, "10x")
-
     # Algorithm configurations
     current_generator = "DFS"
     btn_gen_dfs = Button(830, 210, 80, 40, "DFS")
@@ -90,6 +78,12 @@ def main():
     btn_sol_dfs = Button(910, 300, 70, 40, "DFS")
     btn_sol_astar = Button(990, 300, 70, 40, "A*")
 
+    # speed slider
+    speed_options = [(".1x", 0.1), (".5x", 0.5), ("1x", 1.0), ("5x", 5.0), ("10x", 10.0)]
+    speed_slider = SteppedSlider(830, 400, 150, 8, speed_options, 2)
+    step_accumulator = 0.0
+
+
     # game loop
     running = True
     while running:
@@ -98,11 +92,7 @@ def main():
                 running = False
                 sys.exit()
 
-            if btn_spd_01.is_clicked(event): current_speed = "x0.1"
-            if btn_spd_05.is_clicked(event): current_speed = "x0.5"
-            if btn_spd_1.is_clicked(event): current_speed = "x1"
-            if btn_spd_5.is_clicked(event): current_speed = "x5"
-            if btn_spd_10.is_clicked(event): current_speed = "x10"
+            speed_slider.handle_event(event)
 
             # algorithm selectors logic 
             if btn_gen_dfs.is_clicked(event) and current_generator != "DFS": 
@@ -209,10 +199,9 @@ def main():
 
         steps_this_frame = 0
         if is_generating or is_solving:
-            step_accumulator += speeds[current_speed]
+            step_accumulator += speed_slider.get_value()
             steps_this_frame = int(step_accumulator)
             step_accumulator -= steps_this_frame
-
 
         # 1. maze generator logic
         if is_generating:
@@ -313,13 +302,8 @@ def main():
         # draw speed ui elements
         speed_label = ui_font.render("Animation Speed", True, TEXT_COLOUR)
         screen.blit(speed_label, (830, 360))
-
-        btn_spd_01.draw(screen, is_active=(current_speed == "x0.1"))
-        btn_spd_05.draw(screen, is_active=(current_speed == "x0.5"))
-        btn_spd_1.draw(screen, is_active=(current_speed == "x1"))
-        btn_spd_5.draw(screen, is_active=(current_speed == "x5"))
-        btn_spd_10.draw(screen, is_active=(current_speed == "x10"))
-
+        speed_slider.draw(screen)
+        
         # draw algo ui elements
         gen_label = ui_font.render("Generator Algorithm", True, TEXT_COLOUR)
         screen.blit(gen_label, (830, 180))
