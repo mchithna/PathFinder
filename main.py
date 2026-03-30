@@ -63,24 +63,24 @@ def main():
     btn_solve = Button(1010, 480, 160, 50, "Solve")
 
     # maze size buttons
-    btn_s = Button(830, 120, 50, 40, "S")
-    btn_m = Button(890, 120, 50, 40, "M")
-    btn_l = Button(950, 120, 50, 40, "L")
-    btn_xl = Button(1010, 120, 50, 40, "XL")
+    btn_s = Button(830, 120, 50, 46, "S", "16x12")
+    btn_m = Button(890, 120, 50, 46, "M", "32x24")
+    btn_l = Button(950, 120, 50, 46, "L", "40x30")
+    btn_xl = Button(1010, 120, 50, 46, "XL", "80x60")
 
     # Algorithm configurations
     current_generator = "DFS"
-    btn_gen_dfs = Button(830, 210, 80, 40, "DFS")
-    btn_gen_prim = Button(920, 210, 80, 40, "Prim")
+    btn_gen_dfs = Button(830, 215, 80, 40, "DFS")
+    btn_gen_prim = Button(920, 215, 80, 40, "Prim")
 
     current_solver = "BFS"
-    btn_sol_bfs = Button(830, 300, 70, 40, "BFS")
-    btn_sol_dfs = Button(910, 300, 70, 40, "DFS")
-    btn_sol_astar = Button(990, 300, 70, 40, "A*")
+    btn_sol_bfs = Button(830, 305, 70, 40, "BFS")
+    btn_sol_dfs = Button(910, 305, 70, 40, "DFS")
+    btn_sol_astar = Button(990, 305, 70, 40, "A*")
 
     # speed slider
-    speed_options = [(".1x", 0.1), (".5x", 0.5), ("1x", 1.0), ("5x", 5.0), ("10x", 10.0)]
-    speed_slider = SteppedSlider(830, 400, 150, 8, speed_options, 2)
+    speed_options = [("0.01x", 0.01), ("0.1x", 0.1), ("0.5x", 0.5), ("1x", 1.0), ("5x", 5.0), ("10x", 10.0), ("100x", 100.0)]
+    speed_slider = SteppedSlider(830, 405, 200, 8, speed_options, 3)
     step_accumulator = 0.0
 
 
@@ -301,23 +301,25 @@ def main():
 
         # draw speed ui elements
         speed_label = ui_font.render("Animation Speed", True, TEXT_COLOUR)
-        screen.blit(speed_label, (830, 360))
+        screen.blit(speed_label, (830, 365))
         speed_slider.draw(screen)
-        
         # draw algo ui elements
         gen_label = ui_font.render("Generator Algorithm", True, TEXT_COLOUR)
-        screen.blit(gen_label, (830, 180))
+        screen.blit(gen_label, (830, 185))
         btn_gen_dfs.draw(screen, is_active=(current_generator == "DFS"))
         btn_gen_prim.draw(screen, is_active=(current_generator == "Prim"))
 
         sol_label = ui_font.render("Solver Algorithm", True, TEXT_COLOUR)
-        screen.blit(sol_label, (830, 270))
+        screen.blit(sol_label, (830, 275))
         btn_sol_bfs.draw(screen, is_active=(current_solver == "BFS"))
         btn_sol_dfs.draw(screen, is_active=(current_solver == "DFS"))
         btn_sol_astar.draw(screen, is_active=(current_solver == "A*"))
 
         btn_generate.draw(screen)
         btn_solve.draw(screen)
+
+        from ui import draw_legend
+        draw_legend(screen, 830, 560)
 
         pygame.display.flip() 
         clock.tick(FPS) # limit to 60 FPS

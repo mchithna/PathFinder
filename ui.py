@@ -2,10 +2,13 @@ import pygame
 from settings import *
 
 class Button:
-    def __init__(self, x, y, width, height, text):
+    def __init__(self, x, y, width, height, text, sub_text=""):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
+        self.sub_text = sub_text
+        # fonts
         self.font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 18, bold=True)
+        self.sub_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 11, bold=True)
 
         self.shadow_rect = pygame.Rect(x + 2, y + 4, width, height)
 
@@ -34,10 +37,21 @@ class Button:
         pygame.draw.rect(screen, BUTTON1H_COLOUR, self.rect, 2, border_radius=6) 
 
 
-        # 4. Draw the text 
-        text_surf = self.font.render(self.text, True, text_color)
-        text_rect = text_surf.get_rect(center=self.rect.center)
-        screen.blit(text_surf, text_rect)
+        # 4. draw the 2 lines of text 
+        if self.sub_text:
+            text_surf = self.font.render(self.text, True, text_color)
+            sub_surf = self.sub_font.render(self.sub_text, True, text_color)
+            
+            # center the text
+            text_rect = text_surf.get_rect(center=(self.rect.centerx, self.rect.centery - 8))
+            sub_rect = sub_surf.get_rect(center=(self.rect.centerx, self.rect.centery + 10))
+            
+            screen.blit(text_surf, text_rect)
+            screen.blit(sub_surf, sub_rect)
+        else:
+            text_surf = self.font.render(self.text, True, text_color)
+            text_rect = text_surf.get_rect(center=self.rect.center)
+            screen.blit(text_surf, text_rect)
 
     def is_clicked(self, event):
         # check if the left mouse is clicked 
@@ -127,3 +141,34 @@ def draw_status_bar(screen, status_text="Idle", status_color=STATUS_IDLE, scanne
 
     eff_surf = font.render(f"Efficiency:  {efficiency}%", True, TEXT_COLOUR)
     screen.blit(eff_surf, (620, MAZE_HEIGHT + 14))
+
+def draw_legend(screen, x, y):
+    font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 14)
+    title_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 12, bold=True)
+    
+    # legend Title
+    title_surf = title_font.render("LEGEND", True, BUTTON1H_COLOUR)
+    screen.blit(title_surf, (x, y))
+    
+    # legend items
+    items = [
+        (SCAN_COLOUR, "Explored cells"),
+        (PATH_COLOUR, "Solution path"),
+        (START_COLOUR, "Start node"),
+        (END_COLOUR, "End node")
+    ]
+    
+    start_y = y + 25
+    for i, (color, text) in enumerate(items):
+        col = i % 2
+        row = i // 2
+        
+        item_x = x + (col * 150)
+        item_y = start_y + (row * 28)
+        
+        # draw box
+        pygame.draw.rect(screen, color, (item_x, item_y, 14, 14), border_radius=3)
+        
+        # draw text
+        text_surf = font.render(text, True, TEXT_COLOUR)
+        screen.blit(text_surf, (item_x + 22, item_y - 2))
