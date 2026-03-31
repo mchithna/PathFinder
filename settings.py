@@ -30,6 +30,10 @@ BUTTON_SHADOW = (17, 17, 27)
 TEXT_COLOUR = (205, 214, 244)   
 ACTIVE_TEXT_COLOUR = (24, 24, 37)
 
+# Action button Colours
+ACTION_PRIMARY = (166, 218, 149) 
+ACTION_HOVER = (186, 238, 169)
+
 # Status Badge Colors
 STATUS_IDLE = (69, 71, 90)       # grey
 STATUS_GEN = (250, 179, 135)     # orange

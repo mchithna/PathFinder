@@ -1,6 +1,7 @@
 import pygame
 import sys
 from settings import *
+from collections import deque
 from grid import init_grid
 from generators import *
 from solvers import *
@@ -14,8 +15,8 @@ def main():
     pygame.display.set_caption("CS50 Pathfinder")
     clock = pygame.time.Clock()
 
-    # Size Configurations
-    sizes = {"S": 50, "M": 25, "L": 20, "XL": 10} # Values are tile size
+    # size configurations
+    sizes = {"S": 50, "M": 25, "L": 20, "XL": 10} # values are tile size
     current_size = "M"
     tile_size = sizes[current_size]
     
@@ -59,28 +60,34 @@ def main():
     title_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 36, bold=True)
     
     # action buttons
-    btn_generate = Button(830, 480, 160, 50, "Generate")
-    btn_solve = Button(1010, 480, 160, 50, "Solve")
+    btn_generate = Button(830, 505, 160, 50, "Generate", style="primary")
+    btn_solve = Button(1010, 505, 160, 50, "Solve", style="secondary")
+
 
     # maze size buttons
-    btn_s = Button(830, 120, 50, 46, "S", "16x12")
-    btn_m = Button(890, 120, 50, 46, "M", "32x24")
-    btn_l = Button(950, 120, 50, 46, "L", "40x30")
-    btn_xl = Button(1010, 120, 50, 46, "XL", "80x60")
+    btn_s = Button(830, 100, 50, 46, "S", "8x6")
+    btn_m = Button(890, 100, 50, 46, "M", "20x15")
+    btn_l = Button(950, 100, 50, 46, "L", "40x30")
+    btn_xl = Button(1010, 100, 50, 46, "XL", "80x60")
 
-    # Algorithm configurations
+    # generator algorithms
     current_generator = "DFS"
-    btn_gen_dfs = Button(830, 215, 80, 40, "DFS")
-    btn_gen_prim = Button(920, 215, 80, 40, "Prim")
+    btn_gen_dfs = Button(830, 190, 160, 40, "DFS")
+    btn_gen_prim = Button(1010, 190, 160, 40, "Prim")
+    btn_gen_kruskal = Button(830, 240, 160, 40, "Kruskal")
+    btn_gen_wilson = Button(1010, 240, 160, 40, "Wilson")
 
+    # solver algorithms
     current_solver = "BFS"
-    btn_sol_bfs = Button(830, 305, 70, 40, "BFS")
-    btn_sol_dfs = Button(910, 305, 70, 40, "DFS")
-    btn_sol_astar = Button(990, 305, 70, 40, "A*")
+    btn_sol_bfs = Button(830, 325, 106, 40, "BFS")
+    btn_sol_dfs = Button(946, 325, 106, 40, "DFS")
+    btn_sol_astar = Button(1062, 325, 106, 40, "A*")
+    btn_sol_wall = Button(830, 375, 160, 40, "Wall Follower")
+    btn_sol_deadend = Button(1010, 375, 160, 40, "Dead-End")
 
     # speed slider
     speed_options = [("0.01x", 0.01), ("0.1x", 0.1), ("0.5x", 0.5), ("1x", 1.0), ("5x", 5.0), ("10x", 10.0), ("100x", 100.0)]
-    speed_slider = SteppedSlider(830, 405, 200, 8, speed_options, 3)
+    speed_slider = SteppedSlider(830, 465, 200, 8, speed_options, 3)
     step_accumulator = 0.0
 
 
@@ -95,22 +102,16 @@ def main():
             speed_slider.handle_event(event)
 
             # algorithm selectors logic 
-            if btn_gen_dfs.is_clicked(event) and current_generator != "DFS": 
-                current_generator = "DFS"
-                print(f"[UI] Switched Generator to: {current_generator}")
-            if btn_gen_prim.is_clicked(event) and current_generator != "Prim": 
-                current_generator = "Prim"
-                print(f"[UI] Switched Generator to: {current_generator}")
+            if btn_gen_dfs.is_clicked(event) and current_generator != "DFS": current_generator = "DFS"
+            if btn_gen_prim.is_clicked(event) and current_generator != "Prim": current_generator = "Prim"
+            if btn_gen_kruskal.is_clicked(event) and current_generator != "Kruskal": current_generator = "Kruskal"
+            if btn_gen_wilson.is_clicked(event) and current_generator != "Wilson": current_generator = "Wilson"
             
-            if btn_sol_bfs.is_clicked(event) and current_solver != "BFS": 
-                current_solver = "BFS"
-                print(f"[UI] Switched Solver to: {current_solver}")
-            if btn_sol_dfs.is_clicked(event) and current_solver != "DFS": 
-                current_solver = "DFS"
-                print(f"[UI] Switched Solver to: {current_solver}")
-            if btn_sol_astar.is_clicked(event) and current_solver != "A*": 
-                current_solver = "A*"
-                print(f"[UI] Switched Solver to: {current_solver}")
+            if btn_sol_bfs.is_clicked(event) and current_solver != "BFS": current_solver = "BFS"
+            if btn_sol_dfs.is_clicked(event) and current_solver != "DFS": current_solver = "DFS"
+            if btn_sol_astar.is_clicked(event) and current_solver != "A*": current_solver = "A*"
+            if btn_sol_wall.is_clicked(event) and current_solver != "Wall Follower": current_solver = "Wall Follower"
+            if btn_sol_deadend.is_clicked(event) and current_solver != "Dead-End": current_solver = "Dead-End"
             
             #  size Buttons logic 
             new_size = None
@@ -158,8 +159,14 @@ def main():
                     active_generator = DFSGenerator(start_cell, cols, rows)
                 elif current_generator == "Prim":
                     active_generator = PrimGenerator(start_cell, cols, rows)
+                else:
+                    # fallback for Kruskal/Wilson until we build them!
+                    print(f"[{current_generator}] not yet built! Falling back to DFS.")
+                    active_generator = DFSGenerator(start_cell, cols, rows)
+                
                 is_generating = True
                 is_solving = False
+                
 
                 # start analytics timer
                 scanned_count = 0
@@ -185,6 +192,10 @@ def main():
                         active_solver = DFSSolver(start_cell, end_cell, cols, rows)
                     elif current_solver == "A*":
                         active_solver = AStarSolver(start_cell, end_cell, cols, rows)
+                    else:
+                        # fallback for Wall/Dead-End until we build them!
+                        print(f"[{current_solver}] not yet built! Falling back to BFS.")
+                        active_solver = BFSSolver(start_cell, end_cell, cols, rows)
 
                     is_solving = True
 
@@ -271,7 +282,7 @@ def main():
         
         # draw title
         title_surf = title_font.render("PATHFINDER", True, TEXT_COLOUR)
-        title_rect = title_surf.get_rect(center=(1000, 50)) 
+        title_rect = title_surf.get_rect(center=(1000, 35)) 
         screen.blit(title_surf, title_rect)
 
         # find current status for the status badge
@@ -292,7 +303,7 @@ def main():
 
         # draw size ui elements
         size_label = ui_font.render("Maze Size", True, TEXT_COLOUR)
-        screen.blit(size_label, (830, 90))
+        screen.blit(size_label, (830, 70))
         
         btn_s.draw(screen, is_active=(current_size == "S"))
         btn_m.draw(screen, is_active=(current_size == "M"))
@@ -301,25 +312,29 @@ def main():
 
         # draw speed ui elements
         speed_label = ui_font.render("Animation Speed", True, TEXT_COLOUR)
-        screen.blit(speed_label, (830, 365))
+        screen.blit(speed_label, (830,430))
         speed_slider.draw(screen)
         # draw algo ui elements
         gen_label = ui_font.render("Generator Algorithm", True, TEXT_COLOUR)
-        screen.blit(gen_label, (830, 185))
+        screen.blit(gen_label, (830, 160))
         btn_gen_dfs.draw(screen, is_active=(current_generator == "DFS"))
         btn_gen_prim.draw(screen, is_active=(current_generator == "Prim"))
+        btn_gen_kruskal.draw(screen, is_active=(current_generator == "Kruskal"))
+        btn_gen_wilson.draw(screen, is_active=(current_generator == "Wilson"))
 
         sol_label = ui_font.render("Solver Algorithm", True, TEXT_COLOUR)
-        screen.blit(sol_label, (830, 275))
+        screen.blit(sol_label, (830, 295))
         btn_sol_bfs.draw(screen, is_active=(current_solver == "BFS"))
         btn_sol_dfs.draw(screen, is_active=(current_solver == "DFS"))
         btn_sol_astar.draw(screen, is_active=(current_solver == "A*"))
+        btn_sol_wall.draw(screen, is_active=(current_solver == "Wall Follower"))
+        btn_sol_deadend.draw(screen, is_active=(current_solver == "Dead-End"))
 
         btn_generate.draw(screen)
         btn_solve.draw(screen)
 
         from ui import draw_legend
-        draw_legend(screen, 830, 560)
+        draw_legend(screen, 830, 570)
 
         pygame.display.flip() 
         clock.tick(FPS) # limit to 60 FPS

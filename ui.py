@@ -2,10 +2,12 @@ import pygame
 from settings import *
 
 class Button:
-    def __init__(self, x, y, width, height, text, sub_text=""):
+    def __init__(self, x, y, width, height, text, sub_text="", style="normal"):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.sub_text = sub_text
+        self.style = style
+
         # fonts
         self.font = pygame.font.SysFont('Segoe UI, Helvetica Neue, Arial', 18, bold=True)
         self.sub_font = pygame.font.SysFont(['poppins', 'segoe ui', 'helvetica', 'arial'], 11, bold=True)
@@ -16,16 +18,30 @@ class Button:
     def draw(self, screen, is_active=False):
         # button hovering effect
         mouse_pos = pygame.mouse.get_pos()
+        hovered = self.rect.collidepoint(mouse_pos)
 
-        if is_active:
-            color = ACTIVE_BUTTON_COLOUR
+        # apply specific styling logic
+        if self.style == "primary":
+            color = ACTION_HOVER if not hovered else ACTION_PRIMARY
             text_color = ACTIVE_TEXT_COLOUR
-        elif self.rect.collidepoint(mouse_pos):
-            color = BUTTON1H_COLOUR
+            border_color = color
+        elif self.style == "secondary":
+            color = SIDEBAR_COLOUR if not hovered else BUTTON1_COLOUR
             text_color = TEXT_COLOUR
-        else:
-            color = BUTTON1_COLOUR
-            text_color = TEXT_COLOUR
+            border_color = ACTIVE_BUTTON_COLOUR
+        else: # "normal" button
+            if is_active:
+                color = ACTIVE_BUTTON_COLOUR
+                text_color = ACTIVE_TEXT_COLOUR
+                border_color = ACTIVE_BUTTON_COLOUR
+            elif hovered:
+                color = BUTTON1H_COLOUR
+                text_color = TEXT_COLOUR
+                border_color = BUTTON1H_COLOUR
+            else:
+                color = BUTTON1_COLOUR
+                text_color = TEXT_COLOUR
+                border_color = BUTTON1H_COLOUR
         
         # draw the drop shadow
         pygame.draw.rect(screen, BUTTON_SHADOW, self.shadow_rect, border_radius=6)
