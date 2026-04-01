@@ -43,6 +43,7 @@ def main():
     # state indicator
     is_generating = False
     is_solving = False
+    current_solver_head = None
 
     # analytics variables
     scanned_count = 0
@@ -135,6 +136,7 @@ def main():
 
                 is_generating = False
                 is_solving = False
+                current_solver_head = None
 
                 # reset analytics
                 scanned_count = 0
@@ -168,8 +170,8 @@ def main():
                 
                 is_generating = True
                 is_solving = False
+                current_solver_head = None
                 
-
                 # start analytics timer
                 scanned_count = 0
                 path_count = 0
@@ -194,12 +196,15 @@ def main():
                         active_solver = DFSSolver(start_cell, end_cell, cols, rows)
                     elif current_solver == "A*":
                         active_solver = AStarSolver(start_cell, end_cell, cols, rows)
+                    elif current_solver == "Wall Follower":
+                        active_solver = WallFollowerSolver(start_cell, end_cell, cols, rows)
                     else:
-                        # fallback for Wall/Dead-End until we build them!
+                        # fallback for Dead-End until we build them!
                         print(f"[{current_solver}] not yet built! Falling back to BFS.")
                         active_solver = BFSSolver(start_cell, end_cell, cols, rows)
 
                     is_solving = True
+                    current_solver_head = start_cell
 
                     # start analytics timer
                     scanned_count = 0
@@ -240,8 +245,12 @@ def main():
             for _ in range(steps_this_frame):
                 current_processed = active_solver.step(grid_cells)
 
+                if current_processed is not None:
+                    current_solver_head = current_processed # NEW: Save the active head!
+
                 if current_processed is None:  
                     is_solving = False
+                    current_solver_head = None
                     print("No Path Possible.")
                     
                     elapsed = pygame.time.get_ticks() - start_time
@@ -249,6 +258,7 @@ def main():
                     break
                 elif current_processed == end_cell:  
                     is_solving = False
+                    current_solver_head = None
                     print("Path Found!")
                     
                     elapsed = pygame.time.get_ticks() - start_time
@@ -267,7 +277,7 @@ def main():
                     break
 
 
-        # visuals
+        # Visuals
         screen.fill(GREY)
         # draw grid
         for cell in grid_cells:
@@ -278,6 +288,11 @@ def main():
             x = active_generator.current_cell.x * tile_size
             y = active_generator.current_cell.y * tile_size
             pygame.draw.rect(screen, (20, 240, 20), (x, y, tile_size, tile_size))
+            
+        elif is_solving and current_solver_head:
+            x = current_solver_head.x * tile_size
+            y = current_solver_head.y * tile_size
+            pygame.draw.rect(screen, (245, 194, 231), (x, y, tile_size, tile_size))
 
         # draw the controls n sidebar
         draw_sidebar(screen)

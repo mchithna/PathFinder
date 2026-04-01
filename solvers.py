@@ -214,3 +214,75 @@ class AStarSolver:
                             self.open_set_hash.add(neighbor)
 
         return current_cell
+    
+# -- Wall Follower (Right-Hand) Algorithm Class
+class WallFollowerSolver:
+    def __init__(self, start_cell, end_cell, cols, rows):
+        self.current_cell = start_cell
+        self.end_cell = end_cell
+        self.cols = cols
+        self.rows = rows
+        
+        self.visited = {start_cell}
+        
+        # heading - 0=top, 1=right, 2=bottom, 3=left
+        # start by looking for the first open wall so we know which way to face
+        self.heading = 0
+        for i in range(4):
+            if not start_cell.walls[i]:
+                self.heading = i
+                break
+                
+        self.path_stack = [start_cell]
+        self.parent_map = {start_cell: None}
+
+    def get_index(self, x, y):
+        if x < 0 or x >= self.cols or y < 0 or y >= self.rows: 
+            return -1 
+        return x + (y * self.cols)
+
+    def step(self, grid_cells):
+        if self.current_cell == self.end_cell:
+            return self.current_cell # Done!
+        
+        self.current_cell.is_scanned = True
+        
+        # 0:top (y-1), 1:right (x+1), 2:bottom (y+1), 3:left (x-1)
+        moves = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        
+        # right-hand rule priority: Right, Straight, Left, Backwards
+        right_dir = (self.heading + 1) % 4
+        straight_dir = self.heading
+        left_dir = (self.heading - 1) % 4
+        back_dir = (self.heading + 2) % 4
+        
+        check_order = [right_dir, straight_dir, left_dir, back_dir]
+        
+        next_cell = None
+        for move_dir in check_order:
+            if not self.current_cell.walls[move_dir]:
+                dx, dy = moves[move_dir]
+                idx = self.get_index(self.current_cell.x + dx, self.current_cell.y + dy)
+                if idx != -1:
+                    next_cell = grid_cells[idx]
+                    self.heading = move_dir # turn to face the new direction!
+                    break
+                    
+        if next_cell:
+            self.visited.add(next_cell)
+            
+            # path tracking (to dynamically build the parent_map for main.py)
+            if len(self.path_stack) > 1 and next_cell == self.path_stack[-2]:
+                # backtracking... remove the dead end from our final yellow path
+                popped_cell = self.path_stack.pop()
+                if popped_cell in self.parent_map:
+                    del self.parent_map[popped_cell]
+            else:
+                # moving forward... add to our final yellow path
+                self.parent_map[next_cell] = self.current_cell
+                self.path_stack.append(next_cell)
+                
+            self.current_cell = next_cell
+            return self.current_cell
+            
+        return None # stuck (justin case)
