@@ -57,7 +57,7 @@ class DFSGenerator:
             return None
         
 
-# -- Prim's Algorithm Class
+# -- Prim's algorithm class
 class PrimGenerator:
     def __init__(self, start_cell, cols, rows):
         self.cols = cols
@@ -118,3 +118,68 @@ class PrimGenerator:
                 self.frontier.append(n)
 
         return self.current_cell
+    
+# -- Kruskal's algorithm class
+class KruskalGenerator:
+    def __init__(self, start_cell, cols, rows):
+        self.cols = cols
+        self.rows = rows
+        
+        # disjoint set: every cell starts as its own "parent" (in its own isolated set)
+        self.parent = {i: i for i in range(cols * rows)}
+        self.edges = []
+        
+        # build a list of all internal walls
+        for y in range(rows):
+            for x in range(cols):
+                i = x + y * cols
+                if x < cols - 1:
+                    self.edges.append((i, i + 1)) # Wall to the Right
+                if y < rows - 1:
+                    self.edges.append((i, i + cols)) # Wall to the Bottom
+                    
+        # shuffle the walls
+        random.shuffle(self.edges)
+        
+        self.current_cell = start_cell
+        self.current_cell.visited = True
+        self.sets_count = cols * rows # We start with N isolated sets
+
+    def find(self, i):
+        # find the "root" of the set this cell belongs to
+        if self.parent[i] == i:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self, i, j):
+        # merge two sets together. returns True if they were merged.
+        root_i = self.find(i)
+        root_j = self.find(j)
+        if root_i != root_j:
+            self.parent[root_i] = root_j
+            self.sets_count -= 1
+            return True
+        return False # they were already connected!
+
+    def step(self, grid_cells):
+        while self.edges and self.sets_count > 1:
+            i, j = self.edges.pop()
+            
+            # if the cells are NOT connected
+            if self.union(i, j):
+                cell1 = grid_cells[i]
+                cell2 = grid_cells[j]
+                
+                # remove wall
+                remove_walls(cell1, cell2)
+                cell1.visited = True
+                cell2.visited = True
+                self.current_cell = cell2
+                return self.current_cell
+
+        if self.sets_count == 1 or not self.edges:
+            # mark any isolated as visited 
+            for cell in grid_cells:
+                cell.visited = True
+            return None

@@ -159,8 +159,10 @@ def main():
                     active_generator = DFSGenerator(start_cell, cols, rows)
                 elif current_generator == "Prim":
                     active_generator = PrimGenerator(start_cell, cols, rows)
+                elif current_generator == "Kruskal":
+                    active_generator = KruskalGenerator(start_cell, cols, rows)
                 else:
-                    # fallback for Kruskal/Wilson until we build them!
+                    # fallback for Wilson until we build them!
                     print(f"[{current_generator}] not yet built! Falling back to DFS.")
                     active_generator = DFSGenerator(start_cell, cols, rows)
                 
