@@ -183,3 +183,101 @@ class KruskalGenerator:
             for cell in grid_cells:
                 cell.visited = True
             return None
+
+# -- Wilson's Algorithm Class
+class WilsonGenerator:
+    def __init__(self, start_cell, cols, rows):
+        self.cols = cols
+        self.rows = rows
+        
+        # The maze starts
+        self.maze_cells = {start_cell}
+        start_cell.visited = True
+        
+        self.unvisited = set()
+        self.is_initialized = False
+        
+        # tracking the worm
+        self.current_walk = [] 
+        self.walk_head = None
+        self.current_cell = start_cell 
+
+    def get_neighbors(self, cell, grid_cells):
+        neighbors = []
+        directions = [(0, -1), (1, 0), (0, 1), (-1, 0)] # Top, Right, Bottom, Left
+        for dx, dy in directions:
+            nx, ny = cell.x + dx, cell.y + dy
+            if 0 <= nx < self.cols and 0 <= ny < self.rows:
+                idx = nx + ny * self.cols
+                neighbors.append(grid_cells[idx])
+        return neighbors
+
+    def step(self, grid_cells):
+        # load all non-maze cells into the unvisited set
+        if not self.is_initialized:
+            for cell in grid_cells:
+                if cell not in self.maze_cells:
+                    self.unvisited.add(cell)
+            self.is_initialized = True
+            
+        # check if we are done
+        if not self.unvisited:
+            # clean up any leftover scan colors
+            for cell in grid_cells:
+                cell.is_scanned = False
+            return None 
+            
+        # 3. if we don't have an active worm, spawn one in a random unvisited spot
+        if not self.current_walk:
+            start = random.choice(tuple(self.unvisited))
+            self.current_walk = [start]
+            self.walk_head = start
+            self.current_cell = self.walk_head
+            start.is_scanned = True # Color the worm light blue!
+            return self.current_cell
+            
+        # 4. take a random step in any direction
+        neighbors = self.get_neighbors(self.walk_head, grid_cells)
+        next_step = random.choice(neighbors)
+        
+        # scenario A - we bumped into the existing maze
+        if next_step in self.maze_cells:
+            self.current_walk.append(next_step)
+            # walk down the worm's body, knocking down walls and locking it into the maze
+            for i in range(len(self.current_walk) - 1):
+                cell_a = self.current_walk[i]
+                cell_b = self.current_walk[i+1]
+                remove_walls(cell_a, cell_b)
+                cell_a.visited = True
+                cell_a.is_scanned = False # Remove the light blue worm color
+                self.maze_cells.add(cell_a)
+                if cell_a in self.unvisited:
+                    self.unvisited.remove(cell_a)
+            
+            # kill the worm so a new one spawns next frame
+            self.current_walk = []
+            self.walk_head = None
+            self.current_cell = next_step
+            return self.current_cell
+            
+        # scenario B - loop-erase ,we crossed our own tail.
+        elif next_step in self.current_walk:
+            loop_index = self.current_walk.index(next_step)
+            # Find the cells that made up the loop and erase their blue color
+            erased_cells = self.current_walk[loop_index + 1:]
+            for c in erased_cells:
+                c.is_scanned = False 
+                
+            # snip the loop off the memory array
+            self.current_walk = self.current_walk[:loop_index + 1]
+            self.walk_head = next_step
+            self.current_cell = self.walk_head
+            return self.current_cell
+            
+        # scenario C - normal step into empty space
+        else:
+            self.current_walk.append(next_step)
+            self.walk_head = next_step
+            self.current_cell = self.walk_head
+            next_step.is_scanned = True # Paint the new worm segment blue
+            return self.current_cell

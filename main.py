@@ -163,10 +163,8 @@ def main():
                     active_generator = PrimGenerator(start_cell, cols, rows)
                 elif current_generator == "Kruskal":
                     active_generator = KruskalGenerator(start_cell, cols, rows)
-                else:
-                    # fallback for Wilson until we build them!
-                    print(f"[{current_generator}] not yet built! Falling back to DFS.")
-                    active_generator = DFSGenerator(start_cell, cols, rows)
+                elif current_generator == "Wilson":
+                    active_generator = WilsonGenerator(start_cell, cols, rows)
                 
                 is_generating = True
                 is_solving = False
