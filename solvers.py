@@ -286,3 +286,90 @@ class WallFollowerSolver:
             return self.current_cell
             
         return None # stuck (justin case)
+
+    
+# -- Dead-End Filling Algorithm Class
+class DeadEndSolver:
+    def __init__(self, start_cell, end_cell, cols, rows):
+        self.start_cell = start_cell
+        self.end_cell = end_cell
+        self.cols = cols
+        self.rows = rows
+        
+        self.dead_ends = deque()
+        self.visited = set() # set for scanned cell counter 
+        self.parent_map = {}
+        self.exit_counts = {}
+        
+        self.initialized = False
+        self.finished = False
+
+    def get_index(self, x, y):
+        if x < 0 or x >= self.cols or y < 0 or y >= self.rows: return -1
+        return x + (y * self.cols)
+        
+    def get_open_neighbors(self, cell, grid_cells):
+        # returns neighbors that are NOT blocked by a wall
+        neighbors = []
+        directions = [(0, -1, 0), (1, 0, 1), (0, 1, 2), (-1, 0, 3)] # Top, Right, Bottom, Left
+        for dx, dy, wall_idx in directions:
+            if not cell.walls[wall_idx]:
+                idx = self.get_index(cell.x + dx, cell.y + dy)
+                if idx != -1:
+                    neighbors.append(grid_cells[idx])
+        return neighbors
+
+    def init_dead_ends(self, grid_cells):
+        # scan the whole grid once to find all initial dead ends
+        for cell in grid_cells:
+            neighbors = self.get_open_neighbors(cell, grid_cells)
+            self.exit_counts[cell] = len(neighbors)
+            # dead end has exactly 1 open exit (and is NOT the start or end cell)
+            if len(neighbors) == 1 and cell != self.start_cell and cell != self.end_cell:
+                self.dead_ends.append(cell)
+        self.initialized = True
+
+    def build_parent_map(self, grid_cells):
+        # once all dead ends are filled, only the correct path remains...
+        # we do a quick invisible BFS on the remaining empty cells so main.py can draw the yellow path
+        queue = deque([self.start_cell])
+        temp_visited = {self.start_cell}
+        
+        while queue:
+            curr = queue.popleft()
+            if curr == self.end_cell:
+                break
+            for n in self.get_open_neighbors(curr, grid_cells):
+                if n not in self.visited and n not in temp_visited:
+                    temp_visited.add(n)
+                    self.parent_map[n] = curr
+                    queue.append(n)
+
+    def step(self, grid_cells):
+        if not self.initialized:
+            self.init_dead_ends(grid_cells)
+
+        # if there are no more dead ends to fill...
+        if not self.dead_ends:
+            if not self.finished:
+                self.finished = True
+                self.build_parent_map(grid_cells)
+                # trick main.py into thinking we "found" the end cell so it draws the yellow line
+                return self.end_cell 
+            return None
+        
+        # pop a dead end and fill it
+        curr = self.dead_ends.popleft()
+        self.visited.add(curr)
+        curr.is_scanned = True # Turn the dead end blue
+
+        # find its open neighbor and reduce its exit count by 1
+        neighbors = self.get_open_neighbors(curr, grid_cells)
+        for n in neighbors:
+            if n not in self.visited:
+                self.exit_counts[n] -= 1
+                # if the neighbor now only has 1 exit left, it has become a new dead end!
+                if self.exit_counts[n] == 1 and n != self.start_cell and n != self.end_cell:
+                    self.dead_ends.append(n)
+        
+        return curr

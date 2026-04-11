@@ -196,10 +196,8 @@ def main():
                         active_solver = AStarSolver(start_cell, end_cell, cols, rows)
                     elif current_solver == "Wall Follower":
                         active_solver = WallFollowerSolver(start_cell, end_cell, cols, rows)
-                    else:
-                        # fallback for Dead-End until we build them!
-                        print(f"[{current_solver}] not yet built! Falling back to BFS.")
-                        active_solver = BFSSolver(start_cell, end_cell, cols, rows)
+                    elif current_solver == "Dead-End":
+                        active_solver = DeadEndSolver(start_cell, end_cell, cols, rows)
 
                     is_solving = True
                     current_solver_head = start_cell
