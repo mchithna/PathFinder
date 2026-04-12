@@ -1,0 +1,1082 @@
+<html lang="en-us"><script src="https://pygame-web.github.io/cdn/0.9.3/pythons.js" type=module id="site" data-python="python3.12" data-LINES=42 data-COLUMNS=132 data-os="vtx,snd,gui" async defer><!--
+
+print("""
+Loading pathfinder from pathfinder.apk
+    Pygbag Version : 0.9.3
+    Template Version : 0.9.3
+    Python  : 3.12
+    CDN URL : https://pygame-web.github.io/cdn/0.9.3/
+    Screen  : 1280x720
+    Title   : pathfinder
+    Folder  : pathfinder
+    Authors : pgw
+    SPDX-License-Identifier: cookiecutter.spdx
+
+""")
+
+import sys
+import asyncio
+import platform
+import json
+from pathlib import Path
+
+# do not rename
+async def custom_site():
+    import embed
+    platform.document.body.style.background = "#7f7f7f"
+
+    platform.window.transfer.hidden = true
+    platform.window.canvas.style.visibility = "visible"
+
+
+    bundle = "pathfinder"
+
+    # the C or js loader could do that but be explicit.
+    appdir = Path(f"/data/data/{bundle}") # /data/data/pathfinder
+    appdir.mkdir()
+
+
+    # unpack filesystem from compressed archive into work dir
+    if platform.window.location.host.find('.itch.zone')>0:
+        import zipfile
+        async with platform.fopen("pathfinder.apk", "rb") as archive:
+            with zipfile.ZipFile(archive) as zip_ref:
+                zip_ref.extractall(appdir.as_posix())
+    else:
+        import tarfile
+        async with platform.fopen("pathfinder.tar.gz", "rb") as archive:
+            tar = tarfile.open(fileobj=archive, mode="r:gz")
+            tar.extractall(path=appdir.as_posix(), filter='tar')
+            tar.close()
+
+    # preloader will change to work dir and prepend it to sys.path
+    platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
+
+
+    # wait preloading complete : that includes images and wasm compilation of bundled modules
+    while embed.counter()<0:
+        await asyncio.sleep(.1)
+
+    main = appdir / "assets" / "main.py"
+
+    # TODO: test for window.webkitAudioContext and block aio loop until gesture if accessing media manager play
+    # before a gesture is recorded ( touch or click )
+
+    # test/wait user media interaction
+    if not platform.window.MM.UME:
+
+        # now that apk is mounted we have access to font cache
+        # but we need to fill __file__ that is not yet set
+        __import__(__name__).__file__ = main
+
+        # now make a prompt
+        msg  = "Ready to start ! Please click/touch page"
+        platform.window.infobox.innerText = msg
+        print("\n"*4, f"    * Waiting for media user engagement. {msg} *" , "\n"*4)
+
+        while not platform.window.MM.UME:
+            await asyncio.sleep(.1)
+
+    # start async top level machinery if not started and add a console in any case if requested.
+    await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
+
+    # now that apk is mounted we have access to font cache
+    # but we need to fill __file__/__name__ that are not yet set
+    __import__(__name__).__file__ = main
+
+
+    def ui_callback(pkg):
+        platform.window.infobox.innerText = f"installing {pkg}"
+
+    await shell.source(main, callback=ui_callback)
+
+    # if you don't reach that step
+    # your main.py has an infinite sync loop somewhere !
+
+    platform.window.infobox.style.display = "none"
+    platform.window.config.gui_divider = 1
+    platform.window.window_resize()
+    print("default.tmpl: done")
+
+    shell.interactive()
+
+asyncio.run( custom_site() )
+
+
+
+
+
+
+
+
+
+
+
+
+# BEGIN BLOCK
+#
+# now this is the html part you can (and should) customize
+# It is not mandatory : pygame-script when it reads the first line (also called
+# shebang ) of above code create absolute minimal widget set
+# required for running with default rules
+#
+# do not alter that comment block it is separating python code from html code
+# =============================================================================
+# --></script><head><!--
+//=============================================================================
+//
+//
+//
+//
+//
+//
+//
+
+    {%- if cookiecutter.comment != "" -%}
+{{cookiecutter.comment}}
+    {% endif %}
+
+--><script type="application/javascript">
+// END BLOCK
+
+
+
+// this dict is available under PyConfig.config from __main__
+
+config = {
+    xtermjs : "1" ,
+    _sdl2 : "canvas",
+    user_canvas : 0,
+    user_canvas_managed : 0,
+    gui_divider : 2,
+    ume_block : 1,
+    can_close : 0,
+    archive : "pathfinder",
+    gui_debug : 2,
+    cdn : "https://pygame-web.github.io/cdn/0.9.3/",
+    autorun : 0,
+    PYBUILD : "3.12",
+    fb_ar   :  1.77,
+    fb_width : "1280",
+    fb_height : "720"
+}
+
+function show_infobox() {
+    infobox.style.display = "block";
+    // Hide loading animation when infobox appears
+    const loadingAnim = document.getElementById("loading-animation");
+    if (loadingAnim) {
+        loadingAnim.style.display = "none";
+    }
+    // CSS already handles positioning: bottom: 30px; left: 50%; transform: translateX(-50%);
+}
+
+</script>
+
+    <title>pathfinder</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="height=device-height, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+ 
+    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+
+    <style>
+        #transfer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #1a1a1a;
+        }
+
+        #transfer .title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #cfd6f4;
+            margin-bottom: 40px;
+            font-family: Arial, sans-serif;
+            letter-spacing: 3px;
+        }
+
+        #status {
+            display: inline-block;
+            vertical-align: top;
+            margin-top: 20px;
+            margin-left: 30px;
+            font-weight: bold;
+            color: #cfd6f4;
+            font-size: 16px;
+        }
+
+        #progress {
+            height: 8px;
+            width: 300px;
+            margin-top: 20px;
+            background: #1e1f2e;
+            border: 1px solid #49325d;
+            border-radius: 4px;
+            accent-color: #89dceb;
+        }
+
+        dotlottie-wc {
+            display: block !important;
+            margin: 20px auto !important;
+        }
+
+        #infobox {
+            position: fixed;
+            bottom: 125px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: #18181f;
+            color: #cfd6f4;
+            font-weight: bold;
+            padding: 16px 24px;
+            border: 2px solid #49325d;
+            border-radius: 8px;
+            z-index: 20;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ── Slide-in sidebar wrapper ── */
+        #sidebar-wrapper {
+            position: fixed;
+            left: -272px;
+            top: calc(50% - 32px); /* shift centre up half the bar height so it feels centred in visible area */
+            transform: translateY(-50%);
+            display: flex;
+            align-items: stretch;
+            z-index: 15;
+            transition: left 0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+        #sidebar-wrapper.open {
+            left: 0;
+        }
+
+        #sidebar-toggle {
+            width: 28px;
+            min-height: 100px;
+            background: #1e1f2e;
+            border: 2px solid #49325d;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #89dceb;
+            font-size: 13px;
+            font-weight: bold;
+            writing-mode: vertical-rl;
+            letter-spacing: 0.12em;
+            padding: 14px 0;
+            user-select: none;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #sidebar-toggle:hover {
+            background: #2a2b3d;
+        }
+
+        #sidebar-toggle .arrow {
+            writing-mode: horizontal-tb;
+            font-size: 10px;
+            margin-top: 10px;
+            opacity: 0.6;
+        }
+
+        #info-sidebar {
+            width: 272px;
+            max-height: 82vh;
+            background: #18181f;
+            border: 2px solid #49325d;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            padding: 14px 14px 14px 14px;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
+            color: #cfd6f4;
+            scrollbar-width: thin;
+            scrollbar-color: #49325d #18181f;
+        }
+
+        #info-sidebar::-webkit-scrollbar { width: 5px; }
+        #info-sidebar::-webkit-scrollbar-track { background: #18181f; }
+        #info-sidebar::-webkit-scrollbar-thumb { background: #49325d; border-radius: 3px; }
+
+        .tab-buttons {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 14px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 7px 4px;
+            background: #2d2d3d;
+            border: 1px solid #49325d;
+            border-radius: 5px;
+            color: #8a8faa;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.2s;
+            letter-spacing: 0.03em;
+        }
+
+        .tab-btn:hover {
+            background: #363650;
+            color: #cfd6f4;
+        }
+
+        .tab-btn.active {
+            background: #2a1a3a;
+            border-color: #89dceb;
+            color: #89dceb;
+        }
+
+        .tab-content {
+            display: none;
+            font-size: 12.5px;
+            line-height: 1.55;
+        }
+
+        .tab-content.active { display: block; }
+
+        .tab-content h3 {
+            margin: 12px 0 7px 0;
+            color: #89dceb;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid #2d2d4a;
+            padding-bottom: 5px;
+        }
+
+        .tab-content h3:first-child { margin-top: 2px; }
+
+        /* ── Instructions tab ── */
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 10px 0;
+        }
+
+        .step-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 7px 0;
+            color: #b8bdd4;
+        }
+
+        .step-num {
+            background: #2a1a3a;
+            border: 1px solid #49325d;
+            color: #89dceb;
+            font-size: 10px;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .step-text strong {
+            color: #cfd6f4;
+        }
+
+        .tip-box {
+            background: #1e1f2e;
+            border: 1px solid #49325d;
+            border-left: 3px solid #89dceb;
+            border-radius: 4px;
+            padding: 8px 10px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #9aa0ba;
+        }
+
+        .tip-box strong { color: #89dceb; }
+
+        /* ── Algo tab ── */
+        .algo-entry {
+            margin-bottom: 11px;
+            padding-bottom: 11px;
+            border-bottom: 1px solid #222235;
+        }
+
+        .algo-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .algo-name-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .algo-entry-name {
+            font-weight: bold;
+            color: #cfd6f4;
+            font-size: 13px;
+        }
+
+        .algo-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .badge-optimal  { background: rgba(137,220,235,0.15); color: #89dceb; border: 1px solid rgba(137,220,235,0.3); }
+        .badge-fast     { background: rgba(122,166,85,0.15);  color: #7aa655; border: 1px solid rgba(122,166,85,0.3); }
+        .badge-uniform  { background: rgba(245,197,99,0.15);  color: #f5c563; border: 1px solid rgba(245,197,99,0.3); }
+        .badge-simple   { background: rgba(160,140,200,0.15); color: #a08cc8; border: 1px solid rgba(160,140,200,0.3); }
+        .badge-unique   { background: rgba(232,131,136,0.15); color: #e88388; border: 1px solid rgba(232,131,136,0.3); }
+
+        .algo-desc {
+            color: #8a8faa;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+
+        .algo-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 10.5px;
+            color: #585e7a;
+        }
+
+        .algo-meta span { color: #6a7090; }
+        .algo-meta span strong { color: #7880a0; }
+
+        /* ── About tab ── */
+        .about-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #1e1f2e;
+            font-size: 12px;
+        }
+
+        .about-info-row:last-of-type { border-bottom: none; }
+        .about-label { color: #585e7a; }
+        .about-value { color: #cfd6f4; font-weight: bold; }
+
+        .gh-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        .gh-btn-primary {
+            background: #2a1a3a;
+            border: 1px solid #89dceb;
+            color: #89dceb;
+        }
+
+        .gh-btn-primary:hover {
+            background: #3a2a4a;
+        }
+
+        .gh-btn-secondary {
+            background: #1e1f2e;
+            border: 1px solid #49325d;
+            color: #f5c563;
+        }
+
+        .gh-btn-secondary:hover {
+            background: #2a2b3e;
+            border-color: #f5c563;
+        }
+
+        .gh-btn svg {
+            flex-shrink: 0;
+        }
+
+        /* ── Page footer ── */
+        #page-footer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 28px;
+            background: #111118;
+            border-bottom: 1px solid #222235;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 8;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #3a3f58;
+        }
+
+        #page-footer a {
+            color: #74798e;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+
+        #page-footer a:hover { color: #89dceb; }
+
+        .footer-sep {
+            color: #222235;
+        }
+
+        /* ── Native experience banner ── */
+        #native-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #12121a;
+            border-top: 1px solid #1e2035;
+            border-bottom: 1px solid #1e2035;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 10px;
+            z-index: 8;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #555a78;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        #native-banner.dismissed {
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+        }
+
+        .banner-text {
+            flex: 1;
+            line-height: 1.4;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .banner-text strong { color: #7880a0; font-weight: bold; }
+
+        .banner-clone-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            background: #1a1b2e;
+            border: 1px solid #49325d;
+            border-radius: 4px;
+            color: #89dceb;
+            font-size: 11px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .banner-clone-btn:hover {
+            background: #221a30;
+            border-color: #89dceb;
+        }
+
+        .banner-dismiss {
+            background: none;
+            border: none;
+            color: #2e3050;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 2px;
+            line-height: 1;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .banner-dismiss:hover { color: #585e7a; }
+
+        div.emscripten { text-align: center; color: #cfd6f4; }
+        div.emscripten_border { border: 1px solid #49325d; }
+        div.thick_border { border: 4px solid #49325d; }
+
+        /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+        /* average size of droid screen 470dp x 320dp  */
+        canvas.emscripten {
+            border: 0px none;
+            background-color: transparent;
+            width: 1200px !important;
+            height: 650px !important;
+            z-index: 5;
+
+            padding: 0;
+            margin: 0 auto; /* centre horizontally only */
+
+            position: absolute;
+            top: 0;        /* stick to top */
+            left: 0;
+            right: 0;
+            /* no bottom — height is fixed, top-anchored */
+        }
+
+        body {
+            font-family: arial;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .topright{
+           position:absolute;
+           top:0px;
+           right:0px;
+        }
+
+        .bottomright {
+            position:absolute;
+            top: 40%;
+            right: 0px;
+        }
+
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trinfo{
+           position: relative;
+           right: 0px;
+           border: 1px solid black;
+        }
+
+        .framed{
+           position: relative;
+           top: 150px;
+           right: 10px;
+           border: 1px solid black;
+        }
+    </style>
+
+    <script>
+/*
+        if (navigator.serviceWorker)
+            navigator.serviceWorker.register("https://pygame-web.github.io/cdn/0.9.3/pygbag0.9.3.js")
+        else
+            console.warn("Service workers not supported")
+*/
+    </script>
+
+    <script src="https://pygame-web.github.io/cdn/0.9.3//browserfs.min.js"></script>
+    <script
+      src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js"
+      type="module"
+    ></script>
+
+</head>
+
+<body>
+
+    <!-- Page footer -->
+    <div id="page-footer">
+        <span>Pathfinder Maze Simulation &mdash; Built with Python &amp; Pygame</span>
+        <span class="footer-sep">|</span>
+        <a href="https://github.com/mchithna" target="_blank">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            GitHub Profile
+        </a>
+        <span class="footer-sep">|</span>
+        <a href="https://github.com/mchithna/pathfinder" target="_blank">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+            Project Repo
+        </a>
+    </div>
+
+    <div id="transfer" align=center>
+        <div class="title">PATHFINDER</div>
+        <dotlottie-wc
+          id="loading-animation"
+          src="https://lottie.host/91032190-c9d3-4614-ab36-2e3f612a7ed2/fenSwylAkl.lottie"
+          style="width: 300px; height: 300px; margin: 20px auto;"
+          autoplay
+          loop
+        ></dotlottie-wc>
+        <div class="emscripten" id="status">Loading...</div>
+        <div class="emscripten">
+            <progress value="0" max="100" id="progress"></progress>
+        </div>
+    </div>
+
+
+
+    <canvas class="emscripten" id="canvas"
+width="1200px"
+height="650px"
+    oncontextmenu="event.preventDefault()" tabindex=1>
+    </canvas>
+
+    <canvas class="emscripten" id="canvas3d"
+width="1200px"
+height="650px"
+    oncontextmenu="event.preventDefault()" tabindex=1 hidden>
+    </canvas>
+
+    <div id="infobox">Loading, please wait ...</div>
+
+    <!-- Slide-in Sidebar -->
+    <div id="sidebar-wrapper">
+        <div id="info-sidebar">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('instructions')">Guide</button>
+                <button class="tab-btn" onclick="showTab('algorithms')">Algos</button>
+                <button class="tab-btn" onclick="showTab('about')">About</button>
+            </div>
+
+            <!-- Instructions Tab -->
+            <div id="instructions" class="tab-content active">
+                <h3>How to Use</h3>
+                <ol class="step-list">
+                    <li>
+                        <span class="step-num">1</span>
+                        <span class="step-text"><strong>Pick a size</strong> — S is great for quick demos; XL stress-tests the algorithms.</span>
+                    </li>
+                    <li>
+                        <span class="step-num">2</span>
+                        <span class="step-text"><strong>Choose a Generator</strong> — each algorithm produces a distinct maze character.</span>
+                    </li>
+                    <li>
+                        <span class="step-num">3</span>
+                        <span class="step-text"><strong>Press Generate</strong> — watch the maze grow cell by cell in real time.</span>
+                    </li>
+                    <li>
+                        <span class="step-num">4</span>
+                        <span class="step-text"><strong>Choose a Solver</strong> — try different solvers on the same maze to compare behaviour.</span>
+                    </li>
+                    <li>
+                        <span class="step-num">5</span>
+                        <span class="step-text"><strong>Press Solve</strong> — the solver explores cells (cyan) then traces the solution (yellow).</span>
+                    </li>
+                    <li>
+                        <span class="step-num">6</span>
+                        <span class="step-text"><strong>Read the stats</strong> — the bottom bar shows scanned cells, path length, and efficiency.</span>
+                    </li>
+                </ol>
+                <div class="tip-box">
+                    <strong>Tip:</strong> Lower the animation speed to 0.1× to study how the solver frontier expands step by step.
+                </div>
+            </div>
+
+            <!-- Algorithms Tab -->
+            <div id="algorithms" class="tab-content">
+                <h3>Generators</h3>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">DFS</span>
+                        <span class="algo-badge badge-fast">Long corridors</span>
+                    </div>
+                    <p class="algo-desc">Recursive backtracker. Carves one deep path, then backtracks to branch. Produces mazes with long winding corridors and relatively few dead-ends.</p>
+                    <div class="algo-meta"><span><strong>Style:</strong> corridor-heavy</span><span><strong>Bias:</strong> directional</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">Prim's</span>
+                        <span class="algo-badge badge-uniform">Balanced</span>
+                    </div>
+                    <p class="algo-desc">Grows a minimum spanning tree from a random seed. Adds the cheapest frontier edge at each step. Creates bushy, branchy mazes with many short dead-ends and even complexity.</p>
+                    <div class="algo-meta"><span><strong>Style:</strong> dense & branchy</span><span><strong>Bias:</strong> centred</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">Kruskal's</span>
+                        <span class="algo-badge badge-uniform">Uniform</span>
+                    </div>
+                    <p class="algo-desc">Randomly merges disjoint cell-sets by removing shared walls. No directional bias. Produces statistically uniform mazes that look symmetrically random.</p>
+                    <div class="algo-meta"><span><strong>Style:</strong> unbiased</span><span><strong>Speed:</strong> fast</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">Wilson's</span>
+                        <span class="algo-badge badge-unique">Truly uniform</span>
+                    </div>
+                    <p class="algo-desc">Uses loop-erased random walks to connect unvisited cells. Generates a perfectly uniform spanning tree — the gold standard for unbiased mazes, but slow to start.</p>
+                    <div class="algo-meta"><span><strong>Style:</strong> perfectly unbiased</span><span><strong>Speed:</strong> slow start</span></div>
+                </div>
+
+                <h3>Solvers</h3>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">BFS</span>
+                        <span class="algo-badge badge-optimal">Shortest path</span>
+                    </div>
+                    <p class="algo-desc">Explores the maze level by level using a queue. Guarantees the absolute shortest path but visits many cells. Great for comparing solver efficiency.</p>
+                    <div class="algo-meta"><span><strong>Optimal:</strong> yes</span><span><strong>Complexity:</strong> O(V+E)</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">DFS</span>
+                        <span class="algo-badge badge-fast">Fast explore</span>
+                    </div>
+                    <p class="algo-desc">Dives deep before backtracking using a stack. Finds a path quickly but it may be far from optimal. Produces dramatic, winding solution traces.</p>
+                    <div class="algo-meta"><span><strong>Optimal:</strong> no</span><span><strong>Complexity:</strong> O(V+E)</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">A*</span>
+                        <span class="algo-badge badge-optimal">Guided optimal</span>
+                    </div>
+                    <p class="algo-desc">Combines BFS's guarantee with a Manhattan-distance heuristic to skip irrelevant cells. Finds the shortest path while scanning far fewer cells than BFS.</p>
+                    <div class="algo-meta"><span><strong>Optimal:</strong> yes</span><span><strong>Heuristic:</strong> Manhattan</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">Wall Follower</span>
+                        <span class="algo-badge badge-simple">Simple</span>
+                    </div>
+                    <p class="algo-desc">Keeps one virtual hand on the right wall and follows it to the exit. Intuitive to visualise but only works on simply-connected (no isolated walls) mazes.</p>
+                    <div class="algo-meta"><span><strong>Optimal:</strong> no</span><span><strong>Limitation:</strong> simple mazes only</span></div>
+                </div>
+
+                <div class="algo-entry">
+                    <div class="algo-name-row">
+                        <span class="algo-entry-name">Dead-End Filling</span>
+                        <span class="algo-badge badge-unique">Visual</span>
+                    </div>
+                    <p class="algo-desc">Progressively seals all dead-end passages from the outside in. What remains is the solution path. Not a search algorithm — it's maze surgery.</p>
+                    <div class="algo-meta"><span><strong>Optimal:</strong> yes</span><span><strong>Style:</strong> elimination</span></div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div id="about" class="tab-content">
+                <h3>Project Info</h3>
+                <div class="about-info-row"><span class="about-label">Version</span><span class="about-value">1.0</span></div>
+                <div class="about-info-row"><span class="about-label">Language</span><span class="about-value">Python 3.12</span></div>
+                <div class="about-info-row"><span class="about-label">Renderer</span><span class="about-value">Pygame</span></div>
+                <div class="about-info-row"><span class="about-label">Web runtime</span><span class="about-value">Pygbag 0.9.3</span></div>
+                <div class="about-info-row"><span class="about-label">License</span><span class="about-value">MIT</span></div>
+
+                <h3 style="margin-top:14px;">Links</h3>
+                <!-- ↓ Replace href="#" with your actual GitHub repo URL -->
+                <a class="gh-btn gh-btn-primary" href="https://github.com/yourusername/pathfinder" target="_blank">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+                    View on GitHub
+                </a>
+                <a class="gh-btn gh-btn-secondary" href="https://github.com/yourusername/pathfinder" target="_blank">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    Star this repo
+                </a>
+            </div>
+        </div>
+
+        <!-- Toggle tab always visible on right edge of sidebar -->
+        <div id="sidebar-toggle" onclick="toggleSidebar()">
+            <span>INFO</span>
+            <span class="arrow" id="toggle-arrow">▶</span>
+        </div>
+    </div>
+
+    <!-- Native experience banner -->
+    <div id="native-banner">
+        <div class="banner-text">
+            <strong>&#9432; You're viewing the WebAssembly port.</strong>
+            Performance may vary in-browser. For the full native experience with smooth rendering, run it locally &mdash;
+            <a class="banner-clone-btn" href="https://github.com/yourusername/pathfinder" target="_blank">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+                Clone &amp; run locally
+            </a>
+        </div>
+        <button class="banner-dismiss" onclick="dismissBanner()" title="Dismiss">&times;</button>
+    </div>
+
+    <div id=html></div>
+
+    <div id=crt  class=bottomright >
+
+        <div id="system" hidden>
+            <div class="button-container">
+                <button id="aiostop" disabled>AIO ⏏︎</button>
+                <button id="aiopaused_true" disabled>AIO ■</button>
+                <button id="aiopaused_false" disabled>AIO ▶</button>
+                <button id="pygame_mixer_music_pause" disabled>Music ■</button>
+            </div>
+
+            <div class="button-container">
+                <div id=load_min>min</div>
+                <div id=load_avg>avg</div>
+                <div id=load_max>max</div>
+              <button id="load_rst" disabled>RESET</button>
+            </div>
+
+            <div id="level">(battery level unknown)</div>
+            <div id="stateBattery">(charging state unknown)</div>
+
+        </div>
+
+        <div id=box class="emscripten_border" hidden=true>
+
+            <div id="info" class="trinfo"></div>
+
+            <iframe id="iframe" class="framed" name="iframe"
+width="470px" height="90%"
+allowtransparency="true"
+style="z-index: 10;"
+style="background: #FFFFFF;"
+frameborder="1"
+                allowfullscreen="true"
+                webkitallowfullscreen="true"
+                msallowfullscreen="true"
+                mozallowfullscreen="true"
+                sandbox="allow-same-origin allow-top-navigation allow-scripts allow-pointer-lock"
+                allow="autoplay; fullscreen *; geolocation; microphone; camera; midi; monetization; xr-spatial-tracking; gamepad; gyroscope; accelerometer; xr; cross-origin-isolated"
+                src="https://pygame-web.github.io/cdn/0.9.3/empty.html"
+                scrolling="yes">
+            </iframe>
+        </div>
+
+    </div>
+
+
+    <div id="dlg" hidden>
+        <input type="file" id="dlg_multifile" multiple accept="image/*">
+        <label for="dlg_multifile">Select files</label>
+    </div>
+
+    <div id="pyconsole">
+        <div id="terminal" tabIndex=1 align="left"></div>
+    </div>
+
+    <script type="application/javascript">
+
+    globalThis.__canvas_resized = (self, ecw, ech) => {
+        console.warn("TODO: panda3d canvas monitor", self, ecw, ech)
+    }
+
+    async function custom_onload(debug_hidden) {
+        // this is called before anything python is loaded
+        // make your js customization here
+        console.log(__FILE__, "custom_onload")
+
+        pyconsole.hidden = debug_hidden
+        system.hidden = debug_hidden
+        transfer.hidden = debug_hidden
+        info.hidden = debug_hidden
+        box.hidden =  debug_hidden
+
+        show_infobox()
+    }
+
+    function custom_prerun(){
+        // no python main and no (MEMFS + VFS) yet.
+        console.log(__FILE__, "custom_prerun")
+
+    }
+
+    function custom_postrun(){
+        // python main and no VFS filesystem yet.
+        console.log(__FILE__, "custom_postrun")
+
+    }
+
+    function debug() {
+        // allow to gain access to dev tools from js console
+        // but only on desktop. difficult to reach when in iframe
+        python.config.debug = true
+        custom_onload(false)
+        Module.PyRun_SimpleString("shell.uptime()")
+        window_resize()
+    }
+
+    function info_inline(data){
+        document.getElementById("info").innerHTML = data
+    }
+
+    function info_online(url) {
+        // display info about current APK
+        fetch( url /*, options */)
+            .then((response) => response.text())
+            .then((html) => {
+                info_inline(html);
+        })
+        .catch((error) => {
+            console.warn(error);
+        });
+    }
+
+    function frame_online(url) {
+        window.frames["iframe"].location = url;
+    }
+
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const sel = document.getElementById(tabName);
+        if (sel) sel.classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function toggleSidebar() {
+        const wrapper = document.getElementById('sidebar-wrapper');
+        const arrow   = document.getElementById('toggle-arrow');
+        const isOpen  = wrapper.classList.toggle('open');
+        arrow.textContent = isOpen ? '◀' : '▶';
+    }
+
+    function dismissBanner() {
+        const banner = document.getElementById('native-banner');
+        banner.classList.add('dismissed');
+        setTimeout(() => {
+            banner.style.display = 'none';
+            // canvas can now extend closer to footer only
+            document.querySelectorAll('canvas.emscripten').forEach(c => {
+                c.style.bottom = '28px';
+            });
+        }, 400);
+    }
+
+    </script>
+
+</body>
+</html>
