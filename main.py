@@ -1,5 +1,5 @@
 import pygame
-import sys
+import asyncio 
 from settings import *
 from collections import deque
 from grid import init_grid
@@ -8,7 +8,7 @@ from solvers import *
 from ui import Button, draw_sidebar, draw_status_bar, SteppedSlider
 
 
-def main():
+async def main():  # .make the main function asynchronous
     # window setup 
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -98,7 +98,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                sys.exit()
 
             speed_slider.handle_event(event)
 
@@ -242,7 +241,7 @@ def main():
                 current_processed = active_solver.step(grid_cells)
 
                 if current_processed is not None:
-                    current_solver_head = current_processed # NEW: Save the active head!
+                    current_solver_head = current_processed # save the active head
 
                 if current_processed is None:  
                     is_solving = False
@@ -350,9 +349,10 @@ def main():
         draw_legend(screen, 830, 570)
 
         pygame.display.flip() 
+        await asyncio.sleep(0) # .give control back to the browser every frame
         clock.tick(FPS) # limit to 60 FPS
 
     pygame.quit()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())  # .run the async main function
