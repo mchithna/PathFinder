@@ -15,7 +15,7 @@
 
 Try it directly in your browser — no installation needed:
 
-**[→ Launch Pathfinder](https://yourusername.github.io/pathfinder)**
+**[→ Launch Pathfinder](https://mchithna.github.io/PathFinder/)**
 
 > **Note:** This is the WebAssembly port via Pygbag. For smoother performance and full rendering speed, run it locally (see [Getting Started](#-getting-started)).
 
@@ -44,7 +44,7 @@ Try it directly in your browser — no installation needed:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/pathfinder.git
+git clone https://github.com/mchithna/PathFinder.git
 cd pathfinder
 
 # 2. Install dependencies
@@ -191,4 +191,4 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 ---
 
-<p align="center">Built with Python & Pygame &nbsp;·&nbsp; <a href="https://mchithna.github.io/pathfinder">Live Demo</a> &nbsp;·&nbsp; <a href="https://github.com/mchithna/pathfinder">GitHub</a></p>
+<p align="center">Built with Python & Pygame &nbsp;·&nbsp; <a href="https://mchithna.github.io/PathFinder/">Live Demo</a> &nbsp;·&nbsp; <a href="https://github.com/mchithna/PathFinder">GitHub</a></p>
