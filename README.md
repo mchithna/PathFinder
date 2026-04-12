@@ -15,7 +15,7 @@
 
 Try it directly in your browser — no installation needed:
 
-**[→ Launch Pathfinder](https://yourusername.github.io/pathfinder)**
+**[→ Launch Pathfinder](https://mchithna.github.io/PathFinder/)**
 
 > **Note:** This is the WebAssembly port via Pygbag. For smoother performance and full rendering speed, run it locally (see [Getting Started](#-getting-started)).
 
@@ -44,7 +44,7 @@ Try it directly in your browser — no installation needed:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/pathfinder.git
+git clone https://github.com/mchithna/PathFinder.git
 cd pathfinder
 
 # 2. Install dependencies
@@ -86,6 +86,8 @@ That's it. No virtual environment required for a basic run.
 ## 🧠 How It Works
 
 Pathfinder is split into two phases: **generation** (building the maze) and **solving** (finding a path through it).
+
+> 📖 **For detailed explanations of each algorithm, including how they work and their performance characteristics, check out [Algorithms.md](Algorithms.md).**
 
 ### 👾Maze Generation Algorithms
 
@@ -185,10 +187,21 @@ Ideas for future additions: customized mazes, weighted cells, more algorithms, m
 
 ---
 
+## references
+
+* https://en.wikipedia.org/wiki/Maze_generation_algorithm
+* https://en.wikipedia.org/wiki/Maze-solving_algorithm
+* https://bigbigdoudou.github.io/maze_solver_front/
+* https://hcilab.net/class-project/fra-641-computer-programming-for-robotics/class-project-generation-and-solving-maze-by-simulation/
+* https://professor-l.github.io/mazes/
+* https://www.youtube.com/watch?v=4L7BDRmH4cM 
+ 
+ ---
+
 ## 📄 License
 
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
-<p align="center">Built with Python & Pygame &nbsp;·&nbsp; <a href="https://mchithna.github.io/pathfinder">Live Demo</a> &nbsp;·&nbsp; <a href="https://github.com/mchithna/pathfinder">GitHub</a></p>
+<p align="center">Built with Python & Pygame &nbsp;·&nbsp; <a href="https://mchithna.github.io/PathFinder/">Live Demo</a> &nbsp;·&nbsp; <a href="https://github.com/mchithna/PathFinder">GitHub</a></p>
