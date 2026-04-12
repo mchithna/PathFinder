@@ -87,6 +87,8 @@ That's it. No virtual environment required for a basic run.
 
 Pathfinder is split into two phases: **generation** (building the maze) and **solving** (finding a path through it).
 
+> 📖 **For detailed explanations of each algorithm, including how they work and their performance characteristics, check out [Algorithms.md](Algorithms.md).**
+
 ### 👾Maze Generation Algorithms
 
 **DFS (Recursive Backtracker)**
@@ -184,6 +186,17 @@ git push origin feature/your-feature-name
 Ideas for future additions: customized mazes, weighted cells, more algorithms, maze import/export.
 
 ---
+
+## references
+
+* https://en.wikipedia.org/wiki/Maze_generation_algorithm
+* https://en.wikipedia.org/wiki/Maze-solving_algorithm
+* https://bigbigdoudou.github.io/maze_solver_front/
+* https://hcilab.net/class-project/fra-641-computer-programming-for-robotics/class-project-generation-and-solving-maze-by-simulation/
+* https://professor-l.github.io/mazes/
+* https://www.youtube.com/watch?v=4L7BDRmH4cM 
+ 
+ ---
 
 ## 📄 License
 
